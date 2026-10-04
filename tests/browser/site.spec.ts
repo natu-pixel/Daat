@@ -48,6 +48,41 @@ test("desktop gallery travels exactly from the first to the last panel", async (
   await page.screenshot({ path: testInfo.outputPath("gallery-last.png") });
 });
 
+test("gallery image frames fit the full artwork without colored letterboxing", async ({ page }, testInfo) => {
+  for (const layout of [
+    { width: 1440, height: 900, reducedMotion: "no-preference" as const },
+    { width: 375, height: 812, reducedMotion: "no-preference" as const },
+    { width: 1440, height: 900, reducedMotion: "reduce" as const },
+  ]) {
+    await page.setViewportSize({ width: layout.width, height: layout.height });
+    await page.emulateMedia({ reducedMotion: layout.reducedMotion });
+    await page.goto("/work/solvanta-labs");
+    const frames = page.locator(".gallery-panel-art.is-image");
+    expect(await frames.count()).toBeGreaterThan(0);
+    for (const frame of await frames.all()) {
+      const image = frame.locator("img");
+      await image.scrollIntoViewIfNeeded();
+      await expect.poll(() => image.evaluate((element: HTMLImageElement) => element.complete && element.naturalWidth > 0)).toBe(true);
+      const bounds = await frame.evaluate((element) => {
+        const image = element.querySelector("img")!;
+        const artwork = image.getBoundingClientRect();
+        const box = element.getBoundingClientRect();
+        return {
+          widthDifference: Math.abs(box.width - artwork.width),
+          heightDifference: Math.abs(box.height - artwork.height),
+          ratioDifference: Math.abs(artwork.width / artwork.height - image.naturalWidth / image.naturalHeight),
+          overflow: document.documentElement.scrollWidth > window.innerWidth,
+        };
+      });
+      expect(bounds.widthDifference).toBeLessThan(1);
+      expect(bounds.heightDifference).toBeLessThan(1);
+      expect(bounds.ratioDifference).toBeLessThan(.01);
+      expect(bounds.overflow).toBe(false);
+    }
+    if (layout.width === 375) await frames.nth(2).screenshot({ path: testInfo.outputPath("gallery-fitted-mobile.png") });
+  }
+});
+
 test("desktop and tablet layouts have no horizontal overflow", async ({ page }, testInfo) => {
   for (const size of [{ width: 1440, height: 900 }, { width: 768, height: 1024 }]) {
     await page.setViewportSize(size);

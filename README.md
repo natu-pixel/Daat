@@ -21,7 +21,7 @@ All 52 original images remain untouched in [works](./works). Optimized WebP copi
 npm run assets:works
 ```
 
-This regenerates the WebP assets and manifest after changing source images. Keep caption order and project mappings in sync in [lib/local-content.ts](./lib/local-content.ts). Conversion preserves image proportions and does not enlarge artwork. Full artwork is contained in the scroll gallery; portrait campaign pieces use an uncropped responsive masonry grid instead of a 26-screen pinned sequence.
+This regenerates the WebP assets and manifest after changing source images. Keep caption order and project mappings in sync in [lib/local-content.ts](./lib/local-content.ts). Conversion preserves image proportions and does not enlarge artwork. Scroll-gallery image frames shrink to the artwork's natural proportions, without colored letterboxing or cropping, on desktop, mobile, and reduced-motion layouts. Portrait campaign pieces use an uncropped responsive masonry grid instead of a 26-screen pinned sequence.
 
 ### Official DAAT logo and project ticker
 
