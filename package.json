@@ -1,0 +1,42 @@
+{
+  "name": "daat-studio",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "assets:works": "node scripts/prepare-works.mjs",
+    "assets:hero": "node scripts/prepare-hero.mjs",
+    "assets:brand": "node scripts/prepare-brand.mjs",
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:e2e": "playwright test",
+    "studio": "sanity dev",
+    "studio:deploy": "sanity deploy"
+  },
+  "dependencies": {
+    "@sanity/client": "8.9.0",
+    "@upstash/ratelimit": "2.2.0",
+    "@upstash/redis": "1.39.0",
+    "next": "16.3.8",
+    "motion": "12.43.0",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "resend": "6.32.0",
+    "sharp": "0.35.5",
+    "sanity": "6.17.0",
+    "zod": "^4.0.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.63.0",
+    "@types/node": "^24.0.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "eslint": "^9.0.0",
+    "eslint-config-next": "16.3.8",
+    "typescript": "^5.9.0",
+    "vitest": "^4.0.0"
+  }
+}
