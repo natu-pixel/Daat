@@ -15,13 +15,13 @@ Open the URL printed by Next.js. Without Sanity configuration, the site displays
 
 ## Supplied artwork
 
-All 52 original images remain untouched in [works](./works). Optimized WebP copies live in [public/works](./public/works); the homepage image wall, project cards, project galleries, and campaign grid use these files. The Solvanta social-layout image found inside the Apex source folder is associated with Solvanta without moving its original.
+The 36 remaining source images live in [works](./works), including 10 posters after the requested removals. Optimized WebP copies live in [public/works](./public/works); the homepage image wall, project cards, project galleries, and campaign grid use these files. The Solvanta social-layout image found inside the Apex source folder is associated with Solvanta without moving its original.
 
 ```powershell
 npm run assets:works
 ```
 
-This regenerates the WebP assets and manifest after changing source images. Keep caption order and project mappings in sync in [lib/local-content.ts](./lib/local-content.ts). Conversion preserves image proportions and does not enlarge artwork. Scroll-gallery image frames shrink to the artwork's natural proportions, without colored letterboxing or cropping, on desktop, mobile, and reduced-motion layouts. Portrait campaign pieces use an uncropped responsive masonry grid instead of a 26-screen pinned sequence.
+This regenerates the WebP assets and manifest after changing source images and removes stale numbered WebP derivatives from each processed output collection. It never removes source artwork or other output filenames. Keep caption order and project mappings in sync in [lib/local-content.ts](./lib/local-content.ts); generated image numbering follows the remaining source filenames. The homepage poster preview uses up to eight remaining images rather than fixed gallery indexes. Conversion preserves image proportions and does not enlarge artwork. Scroll-gallery image frames shrink to the artwork's natural proportions, without colored letterboxing or cropping, on desktop, mobile, and reduced-motion layouts. Portrait campaign pieces use an uncropped responsive masonry grid instead of a pinned sequence.
 
 ### Official DAAT logo and project ticker
 
@@ -75,25 +75,35 @@ Send a real inquiry and check the recipient inbox before calling the contact for
 
 ## Motion and gallery
 
-### Video hero and rounded surfaces
+### Building hero, particle footer, and rounded surfaces
 
-The homepage uses the supplied MP4 from [works/video](./works/video), with a dark left-side gradient behind the headline and introduction. Image panels, portfolio tiles, poster images, and brand cards share rounded-corner tokens in [app/globals.css](./app/globals.css).
+The homepage uses [building.jpg](./public/building.jpg) with cursor-driven water refraction and subtle static grain, inspired by [the hero reference](./public/hero%20section%20effect.mp4). Mouse movement leaves expanding radial ripples in the image, not a whole-image wobble or translation. Each wave fades over 1.6 seconds; a stationary or absent pointer leaves the image still after the waves settle. A small canvas produces a two-channel displacement texture consumed by SVG; its longest edge is capped at 192 pixels, with at most six live waves and 24 image-space pixels of displacement per channel. No texture encoding occurs when idle. The artwork is overscanned to hide warped edges. Only the artwork is distorted: CMS headline, introduction, links, and controls stay sharp. A dark left-side shade protects readability. Image panels, portfolio tiles, poster images, and brand cards share rounded-corner tokens in [app/globals.css](./app/globals.css).
+
+The global footer uses [gradiant.jpg](./public/gradiant.jpg), dense irregular canvas particle clouds curling along its edges, compact utility rows, and an oversized DAAT invitation inspired by [the footer reference](./public/footer%20effect.mp4). Particle positions are seeded rather than laid out on a dot grid, with a responsive budget of 12 particles per CSS pixel of width, capped at 14,000. A short atmospheric band and a masked top fade avoid an empty panel or hard seam. It retains the contact, home, and privacy destinations and original DAAT wordmark. The recordings are references only; their footage and branding are not embedded.
+
+Mouse movement produces local refraction in the hero; the footer gradient shifts gently and its particles curl into a local vortex around the pointer. Leaving the hero lets existing waves fade without generating a trail back to the center. Leaving the footer returns its motion to neutral. Pointer listeners attach to the section, not the decorative layers, so links remain clickable. Touch scrolling is not intercepted. Pausing or reduced-motion defaults disable pointer-driven motion as well as automatic animation.
+
+The footer invitation also uses a particle-text animation adapted from the supplied React Bits example. It gathers once when the headline enters the viewport, then gently drifts and repels from the mouse. Font-loaded canvas sampling preserves the two-line Aspekta headline, including letter spacing and baselines; resize resamples the glyphs without restarting the entrance. Gathering takes 1.6 seconds with up to 420 ms of stagger, and text particles are capped at 5,200. The existing footer pause control governs both its background and text. Offscreen/hidden suspension preserves progress; reduced motion, no JavaScript, pause, or a text-renderer failure shows the original semantic heading. The decorative canvas is hidden from assistive technology and does not intercept touch scrolling or links. No registry package or Tailwind setup is required.
+
+Both effects have independent, keyboard-accessible pause/resume controls. Reduced motion and no JavaScript show static artwork; no-JavaScript pages omit unusable motion controls. Reduced-motion users can explicitly enable an effect. Live preference changes reset that choice to the new preference. Animation suspends offscreen and when the document is hidden, without losing the user's pause choice. The shared lifecycle caps updates at 30 per second, caps canvas pixel ratio at 1.5, and cleans up frames/listeners/observers. Image or renderer failures are logged and shown beside the controls; text and links remain available.
+
+#### Retained reel preparation tool
+
+The previous reel and its source files remain available, but the active homepage does not load or play them.
 
 ```powershell
 npm run assets:hero
 ```
 
-Place exactly one MP4 in the source folder. This command copies it to [public/hero](./public/hero) and extracts a still poster using installed Edge (or the `PW_BROWSER_CHANNEL` setting). The original is not modified. Re-run it when replacing the reel; the website needs only the resulting public assets, not a browser on the production server.
+Place exactly one MP4 in [works/video](./works/video). This optional legacy command copies it to [public/hero](./public/hero) and extracts a still poster using installed Edge (or the `PW_BROWSER_CHANNEL` setting). The original is not modified. It is not required for the current building hero.
 
-The reel is decorative, muted, looping, and inline, with a visible keyboard-accessible pause/play control. No JavaScript or reduced-motion preferences show the poster without downloading or automatically playing the reel. Reduced-motion users can explicitly choose playback. Playback failures are surfaced beside the control and leave the poster background visible. The static reference inspired layout and rounding only; its artwork is not included.
-
-Motion preference is subscribed through `useSyncExternalStore`, using a still server-rendered default and reacting to live operating-system preference changes. This avoids the installed Motion version's snapshot-only reduced-motion hook and keeps video, gallery, headlines, and card reveals consistent.
+Motion preference is subscribed through `useSyncExternalStore`, using a still server-rendered default and reacting to live operating-system preference changes. This avoids the installed Motion version's snapshot-only reduced-motion hook and keeps the decorative effects, gallery, headlines, and card reveals consistent.
 
 The gallery adapts the supplied scroll-gallery example using Motion's `useScroll` and `useTransform`. On desktop, a sticky viewport translates through panels during vertical scrolling, with a section-local progress bar. Translation is measured from the actual viewport width and updates on resize.
 
 The supplied Pinterest motion reference informed staggered headline entrances and image/card reveals, not the visual identity or content. Text rises into view; photos pop forward with a small spring settle. A shared intersection observer triggers each element once as it enters the viewport, with short stagger delays for poster groups. Motion's `useAnimate` and `stagger` support progressive enhancement: headings and artwork are present before JavaScript, and reduced-motion preferences disable the entrance movement. Keyboard focus immediately settles any in-progress reveal. Only individual content is transformed, never the sticky gallery's ancestors.
 
-Homepage section transitions use asymmetric SVG curves with light-to-navy and navy-to-light gradients around the scroll gallery. Soft blue/cyan backgrounds connect the portfolio, posters, studio, and services; the closing brand strip fades into the footer. Hover and keyboard-focus treatments add gradient accents without tinting the project artwork. These effects use static gradients and short transitions, not continuous animated backgrounds, and honor reduced-motion preferences. No overflow is added around the sticky gallery.
+Homepage section transitions use asymmetric SVG curves with light-to-navy and navy-to-light gradients around the scroll gallery. Soft blue/cyan backgrounds connect the portfolio, posters, studio, and services; the closing brand strip leads into the gradient footer. Hover and keyboard-focus treatments add gradient accents without tinting the project artwork. These section treatments use static gradients and short transitions, independently of the decorative hero/footer motion, and honor reduced-motion preferences. No overflow is added around the sticky gallery.
 
 Mobile and reduced-motion layouts show panels in the normal document flow. A skip link bypasses the gallery. Case studies use their CMS media; the DAAT identity study uses original brand boards. The gallery does not change wheel behavior or hijack document scrolling.
 

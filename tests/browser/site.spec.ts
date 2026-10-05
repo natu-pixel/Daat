@@ -99,7 +99,7 @@ test("mobile navigation and gallery remain usable", async ({ page }, testInfo) =
   await page.setViewportSize({ width: 375, height: 812 });
   await page.goto("/");
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
-  await expect(page.locator(".hero-video .hero-topline .eyebrow")).toBeVisible();
+  await expect(page.locator(".hero-building .hero-topline .eyebrow")).toBeVisible();
   await expect(page.locator(".gallery-sticky")).toHaveCSS("position", "relative");
   await expect(page.locator(".gallery-panels")).toHaveCSS("display", "block");
   await page.getByRole("button", { name: "Menu +" }).click();
@@ -124,8 +124,8 @@ test("reduced motion removes pinned gallery scrolling", async ({ page }) => {
   await expect(page.locator(".gallery-panels")).toHaveCSS("display", "block");
   await expect(page.locator(".gallery-panel")).toHaveCount(5);
   await expect(page.locator(".gallery-progress")).toHaveCount(0);
-  await expect(page.locator(".hero-background-video")).not.toHaveAttribute("src");
-  expect(await page.locator(".hero-background-video").evaluate((video: HTMLVideoElement) => video.paused)).toBe(true);
+  await expect(page.locator(".hero-artwork")).toHaveAttribute("data-motion", "paused");
+  await expect(page.locator(".hero-building-image")).toHaveCSS("filter", "none");
 });
 
 test("skip link and keyboard navigation work", async ({ page }) => {
@@ -152,7 +152,7 @@ test("unconfigured contact delivery displays an honest error", async ({ page }) 
 test("supplied portfolio images, categories, and poster grid are available", async ({ page, request }, testInfo) => {
   expect(await (await request.get("/works/manifest.json")).json()).toEqual(artwork);
   const assets = Object.values(artwork).flat();
-  expect(assets).toHaveLength(52);
+  expect(assets).toHaveLength(36);
   for (const asset of assets) {
     const response = await request.get(asset.url);
     expect(response.status()).toBe(200);
@@ -176,7 +176,7 @@ test("supplied portfolio images, categories, and poster grid are available", asy
   }
   await page.goto("/work/posters-and-campaigns");
   await page.addStyleTag({ content: "html { scroll-behavior: auto !important; }" });
-  await expect(page.locator(".masonry-gallery figure")).toHaveCount(26);
+  await expect(page.locator(".masonry-gallery figure")).toHaveCount(10);
   await expect(page.locator(".scroll-gallery")).toHaveCount(0);
   for (const image of await page.locator(".masonry-gallery img").all()) {
     await image.scrollIntoViewIfNeeded();
@@ -207,65 +207,63 @@ test("headlines and artwork remain visible without JavaScript", async ({ browser
     await expect(page.locator(".portfolio-stage-tile")).toHaveCount(3);
     await expect(page.locator(".scroll-gallery")).not.toHaveClass(/is-pinned/);
     await expect(page.locator(".gallery-panels")).toHaveCSS("display", "block");
-    await expect(page.locator(".hero-background-video")).toHaveAttribute("poster", "/hero/poster.webp");
-    await expect(page.locator(".hero-background-video")).not.toHaveAttribute("src");
+    await expect(page.locator(".hero-building-image")).toBeVisible();
+    await expect(page.locator(".effect-toggle")).toHaveCount(0);
+    await page.locator(".footer").scrollIntoViewIfNeeded();
+    await expect(page.locator(".footer-gradient")).toBeVisible();
+    await expect(page.locator(".footer h2")).toContainText("next move?");
   } finally {
     await context.close();
   }
 });
 
-test("hero uses the supplied reel, shaded copy, rounded corners, and playback controls", async ({ page, request }) => {
-  const response = await request.get("/hero/studio-reel.mp4", { headers: { Range: "bytes=0-1023" } });
-  expect(response.status()).toBe(206);
-  expect(response.headers()["content-type"]).toContain("video/mp4");
-  expect((await request.get("/hero/poster.webp")).status()).toBe(200);
+test("hero uses the supplied building, shaded copy, rounded corners, and effect controls", async ({ page, request }) => {
+  expect((await request.get("/building.jpg")).status()).toBe(200);
   await page.goto("/");
-  const video = page.locator(".hero-background-video");
-  await expect(video).toHaveAttribute("src", "/hero/studio-reel.mp4");
-  await expect.poll(() => video.evaluate((element: HTMLVideoElement) => element.readyState >= 2 && !element.paused)).toBe(true);
-  expect(await video.evaluate((element: HTMLVideoElement) => element.muted && element.loop && element.playsInline)).toBe(true);
+  const artwork = page.locator(".hero-artwork");
+  await expect(artwork).toHaveAttribute("data-motion", "running");
+  await expect(page.locator(".hero-building-image")).toHaveAttribute("src", /building/);
   await expect(page.locator(".hero-shade")).toHaveCSS("background-image", /linear-gradient/);
   expect(await page.locator(".hero").evaluate((element) => parseFloat(getComputedStyle(element).borderTopLeftRadius))).toBeGreaterThanOrEqual(22);
-  await page.getByRole("button", { name: "Pause hero video" }).click();
-  await expect.poll(() => video.evaluate((element: HTMLVideoElement) => element.paused)).toBe(true);
-  await page.getByRole("button", { name: "Play hero video" }).click();
-  await expect.poll(() => video.evaluate((element: HTMLVideoElement) => !element.paused)).toBe(true);
+  await page.getByRole("button", { name: "Pause hero effect" }).click();
+  await expect(artwork).toHaveAttribute("data-motion", "paused");
+  await page.getByRole("button", { name: "Play hero effect" }).click();
+  await expect(artwork).toHaveAttribute("data-motion", "running");
   await page.locator(".selected-work .project-visual").first().scrollIntoViewIfNeeded();
   expect(await page.locator(".selected-work .project-visual").first().evaluate((element) => parseFloat(getComputedStyle(element).borderTopLeftRadius))).toBe(20);
 });
 
-test("reduced motion shows the poster until playback is explicitly requested", async ({ page }) => {
+test("reduced motion shows the building until motion is explicitly requested", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
   const videoRequests: string[] = [];
   page.on("request", (request) => { if (request.url().includes("studio-reel.mp4")) videoRequests.push(request.url()); });
   await page.goto("/");
-  const video = page.locator(".hero-background-video");
-  await expect(video).not.toHaveAttribute("src");
-  await expect(page.getByRole("button", { name: "Play hero video" })).toBeVisible();
+  const artwork = page.locator(".hero-artwork");
+  await expect(artwork).toHaveAttribute("data-motion", "paused");
+  await expect(page.getByRole("button", { name: "Play hero effect" })).toBeVisible();
   expect(videoRequests).toEqual([]);
-  await page.getByRole("button", { name: "Play hero video" }).click();
-  await expect.poll(() => video.evaluate((element: HTMLVideoElement) => !element.paused && element.readyState >= 2)).toBe(true);
-  await page.getByRole("button", { name: "Pause hero video" }).click();
-  await expect.poll(() => video.evaluate((element: HTMLVideoElement) => element.paused)).toBe(true);
+  await page.getByRole("button", { name: "Play hero effect" }).click();
+  await expect(artwork).toHaveAttribute("data-motion", "running");
+  await page.getByRole("button", { name: "Pause hero effect" }).click();
+  await expect(artwork).toHaveAttribute("data-motion", "paused");
 });
 
-test("video failures leave the hero copy and poster visible with an explicit message", async ({ page }) => {
-  await page.route("**/hero/studio-reel.mp4", (route) => route.abort());
+test("building failures leave the hero copy and navigation visible with an explicit message", async ({ page }) => {
+  await page.route("**/*building*", (route) => route.abort());
   await page.goto("/");
-  await expect(page.locator(".hero-video-status")).toContainText(/couldn't/);
+  await expect(page.locator(".hero-effect-controls .effect-status")).toContainText(/couldn't/);
   await expect(page.locator(".hero h1")).toBeVisible();
-  await expect(page.locator(".hero-background-video")).toHaveAttribute("poster", "/hero/poster.webp");
   await expect(page.getByRole("link", { name: "Explore our work" })).toBeVisible();
 });
 
-test("changing the motion preference pauses automatic video and unpins the gallery", async ({ page }) => {
+test("changing the motion preference pauses automatic effects and unpins the gallery", async ({ page }) => {
   await page.goto("/");
-  const video = page.locator(".hero-background-video");
-  await expect.poll(() => video.evaluate((element: HTMLVideoElement) => !element.paused)).toBe(true);
+  const artwork = page.locator(".hero-artwork");
+  await expect(artwork).toHaveAttribute("data-motion", "running");
   await expect(page.locator(".scroll-gallery")).toHaveClass(/is-pinned/);
   await page.emulateMedia({ reducedMotion: "reduce" });
-  await expect(video).not.toHaveAttribute("src");
-  await expect.poll(() => video.evaluate((element: HTMLVideoElement) => element.paused)).toBe(true);
+  await expect(artwork).toHaveAttribute("data-motion", "paused");
+  await expect(page.locator(".hero-building-image")).toHaveCSS("filter", "none");
   await expect(page.locator(".scroll-gallery")).not.toHaveClass(/is-pinned/);
 });
 

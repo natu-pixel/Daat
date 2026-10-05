@@ -67,22 +67,6 @@ const solvanta = gallery(artwork.solvanta, [
 ]);
 solvanta.push(...gallery([artwork.apex[3]], ["Solvanta Labs black-and-yellow social post series"]));
 const posters = gallery(artwork.poster, [
-  "Meri security campaign with two uniformed team members",
-  "Smart Ethio education campaign with students in a classroom",
-  "Holistic Speciality Dental Clinic blue dental-care campaign",
-  "Holistic Speciality Dental Clinic smile campaign",
-  "Holistic Speciality Dental Clinic orthodontic campaign",
-  "Holistic Speciality Dental Clinic treatment explainer",
-  "Holistic Speciality Dental Clinic toothbrush campaign",
-  "Smart Ethio orange mobile-learning campaign",
-  "Holistic Speciality Dental Clinic orthodontic treatment graphic",
-  "Three Stars landscape and yellow-flower campaign",
-  "Moon Fitness Center green-and-yellow campaign",
-  "Holistic Speciality Dental Clinic green seasonal campaign",
-  "Three Stars rehabilitation equipment campaign with crutches",
-  "Meri security team campaign in blue",
-  "Three Stars rehabilitation campaign with a stethoscope",
-  "Meri security services campaign with two team members",
   "Tropical Padel racket and court campaign",
   "Bloom warm-toned seating and lifestyle campaign",
   "Qeero mobile-conversation campaign",
@@ -140,9 +124,9 @@ export const localProjects: Project[] = [
   },
   {
     slug: "posters-and-campaigns", title: "Posters & campaigns", category: "Campaign design",
-    description: "Twenty-six pieces across education, healthcare, security, sport, and everyday business. Different audiences. Distinctive visual voices.",
+    description: "Ten campaign pieces across sport, lifestyle, communication, finance, and property. Different audiences. Distinctive visual voices.",
     deliverables: ["Campaign graphics", "Poster design", "Social artwork"],
-    cover: posters[2], gallery: posters, studioStudy: false, galleryLayout: "grid",
+    cover: posters[0], gallery: posters, studioStudy: false, galleryLayout: "grid",
   },
   studioStudyProject,
 ];

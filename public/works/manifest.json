@@ -84,156 +84,60 @@
   "poster": [
     {
       "url": "/works/poster/01.webp",
-      "width": 1280,
-      "height": 1023,
-      "source": "photo_2026-10-04_18-55-00.jpg"
-    },
-    {
-      "url": "/works/poster/02.webp",
-      "width": 1280,
-      "height": 1024,
-      "source": "photo_2026-10-04_18-55-02.jpg"
-    },
-    {
-      "url": "/works/poster/03.webp",
-      "width": 1280,
-      "height": 1024,
-      "source": "photo_2026-10-04_18-55-04.jpg"
-    },
-    {
-      "url": "/works/poster/04.webp",
-      "width": 1025,
-      "height": 1280,
-      "source": "photo_2026-10-04_18-55-06.jpg"
-    },
-    {
-      "url": "/works/poster/05.webp",
-      "width": 1025,
-      "height": 1280,
-      "source": "photo_2026-10-04_18-55-08.jpg"
-    },
-    {
-      "url": "/works/poster/06.webp",
-      "width": 1280,
-      "height": 1024,
-      "source": "photo_2026-10-04_18-55-10.jpg"
-    },
-    {
-      "url": "/works/poster/07.webp",
-      "width": 936,
-      "height": 1280,
-      "source": "photo_2026-10-04_18-55-11.jpg"
-    },
-    {
-      "url": "/works/poster/08.webp",
-      "width": 1280,
-      "height": 1024,
-      "source": "photo_2026-10-04_18-55-13 (2).jpg"
-    },
-    {
-      "url": "/works/poster/09.webp",
-      "width": 1280,
-      "height": 1024,
-      "source": "photo_2026-10-04_18-55-13.jpg"
-    },
-    {
-      "url": "/works/poster/10.webp",
-      "width": 987,
-      "height": 1280,
-      "source": "photo_2026-10-04_18-55-14.jpg"
-    },
-    {
-      "url": "/works/poster/11.webp",
-      "width": 987,
-      "height": 1280,
-      "source": "photo_2026-10-04_18-55-15 (2).jpg"
-    },
-    {
-      "url": "/works/poster/12.webp",
-      "width": 987,
-      "height": 1280,
-      "source": "photo_2026-10-04_18-55-15.jpg"
-    },
-    {
-      "url": "/works/poster/13.webp",
-      "width": 1280,
-      "height": 1024,
-      "source": "photo_2026-10-04_18-55-16.jpg"
-    },
-    {
-      "url": "/works/poster/14.webp",
-      "width": 1280,
-      "height": 1024,
-      "source": "photo_2026-10-04_18-55-17 (2).jpg"
-    },
-    {
-      "url": "/works/poster/15.webp",
-      "width": 1280,
-      "height": 1024,
-      "source": "photo_2026-10-04_18-55-17.jpg"
-    },
-    {
-      "url": "/works/poster/16.webp",
-      "width": 1280,
-      "height": 1023,
-      "source": "photo_2026-10-04_18-55-18.jpg"
-    },
-    {
-      "url": "/works/poster/17.webp",
       "width": 987,
       "height": 1280,
       "source": "photo_2026-10-04_18-55-22.jpg"
     },
     {
-      "url": "/works/poster/18.webp",
+      "url": "/works/poster/02.webp",
       "width": 987,
       "height": 1280,
       "source": "photo_2026-10-04_18-55-24.jpg"
     },
     {
-      "url": "/works/poster/19.webp",
+      "url": "/works/poster/03.webp",
       "width": 1024,
       "height": 1280,
       "source": "photo_2026-10-04_18-55-25.jpg"
     },
     {
-      "url": "/works/poster/20.webp",
+      "url": "/works/poster/04.webp",
       "width": 1024,
       "height": 1280,
       "source": "photo_2026-10-04_18-55-26.jpg"
     },
     {
-      "url": "/works/poster/21.webp",
+      "url": "/works/poster/05.webp",
       "width": 1024,
       "height": 1280,
       "source": "photo_2026-10-04_18-55-28.jpg"
     },
     {
-      "url": "/works/poster/22.webp",
+      "url": "/works/poster/06.webp",
       "width": 1024,
       "height": 1280,
       "source": "photo_2026-10-04_18-55-29.jpg"
     },
     {
-      "url": "/works/poster/23.webp",
+      "url": "/works/poster/07.webp",
       "width": 1024,
       "height": 1280,
       "source": "photo_2026-10-04_18-55-30.jpg"
     },
     {
-      "url": "/works/poster/24.webp",
+      "url": "/works/poster/08.webp",
       "width": 987,
       "height": 1280,
       "source": "photo_2026-10-04_18-55-31.jpg"
     },
     {
-      "url": "/works/poster/25.webp",
+      "url": "/works/poster/09.webp",
       "width": 987,
       "height": 1280,
       "source": "photo_2026-10-04_18-55-33.jpg"
     },
     {
-      "url": "/works/poster/26.webp",
+      "url": "/works/poster/10.webp",
       "width": 987,
       "height": 1280,
       "source": "photo_2026-10-04_18-55-34.jpg"

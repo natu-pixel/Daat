@@ -1,5 +1,5 @@
 import sharp from "sharp";
-import { readdir, mkdir, writeFile, stat } from "node:fs/promises";
+import { readdir, mkdir, writeFile, stat, unlink } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -9,6 +9,7 @@ const destination = path.join(root, "public", "works");
 const manifest = {};
 let sourceBytes = 0;
 let outputBytes = 0;
+let removed = 0;
 
 for (const folder of (await readdir(source, { withFileTypes: true })).filter((entry) => entry.isDirectory() && !["video", "svgs"].includes(entry.name.toLowerCase())).sort((a, b) => a.name.localeCompare(b.name))) {
   const input = path.join(source, folder.name);
@@ -26,9 +27,17 @@ for (const folder of (await readdir(source, { withFileTypes: true })).filter((en
     outputBytes += info.size;
     assets.push({ url: `/works/${folder.name}/${name}`, width: info.width, height: info.height, source: filename });
   }
+  const prepared = new Set(assets.map((asset) => path.basename(asset.url)));
+  for (const entry of await readdir(output, { withFileTypes: true })) {
+    if (entry.isFile() && /^\d{2,}\.webp$/.test(entry.name) && !prepared.has(entry.name)) {
+      await unlink(path.join(output, entry.name));
+      removed++;
+    }
+  }
   manifest[folder.name] = assets;
 }
 
 await writeFile(path.join(destination, "manifest.json"), `${JSON.stringify(manifest, null, 2)}\n`);
 console.log(`Prepared ${Object.values(manifest).reduce((count, assets) => count + assets.length, 0)} images in ${Object.keys(manifest).length} collections.`);
+console.log(`Removed ${removed} stale generated WebP images.`);
 console.log(`Originals: ${(sourceBytes / 1024 / 1024).toFixed(2)} MB. WebP: ${(outputBytes / 1024 / 1024).toFixed(2)} MB.`);

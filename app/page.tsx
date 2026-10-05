@@ -9,7 +9,7 @@ import { PortfolioStage } from "@/components/portfolio-stage";
 import { PosterPreview } from "@/components/poster-preview";
 import type { Project } from "@/lib/content-schema";
 import { HeroHeadline } from "@/components/hero-headline";
-import { HeroVideo } from "@/components/hero-video";
+import { BuildingHero } from "@/components/building-hero";
 import { SectionTransition } from "@/components/section-transition";
 import { LogoTicker } from "@/components/logo-ticker";
 
@@ -24,8 +24,8 @@ export default async function Home() {
   const hasGallery = showcase.length > 0 || !!studioProject;
   return (
     <div className="homepage">
-      <section className="hero hero-video">
-        <HeroVideo />
+      <section className="hero hero-building">
+        <BuildingHero />
         <div className="hero-shade" aria-hidden="true" />
         <div className="hero-content">
           <div className="hero-topline"><span className="eyebrow"><i className="status-dot" /> BRAND. DIGITAL. MOTION.</span></div>

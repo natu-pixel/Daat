@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { access } from "node:fs/promises";
+import { access, readdir } from "node:fs/promises";
 import path from "node:path";
 import { localProjects } from "../lib/local-content";
 import manifest from "../public/works/manifest.json";
@@ -11,9 +11,9 @@ import sharp from "sharp";
 describe("supplied portfolio", () => {
   const suppliedProjects = localProjects.filter((project) => !project.studioStudy);
   const media = suppliedProjects.flatMap((project) => project.gallery);
-  it("uses all 52 original artworks exactly once across the project galleries", () => {
-    expect(media).toHaveLength(52);
-    expect(new Set(media.map((asset) => asset.url)).size).toBe(52);
+  it("uses all 36 remaining artworks exactly once across the project galleries", () => {
+    expect(media).toHaveLength(36);
+    expect(new Set(media.map((asset) => asset.url)).size).toBe(36);
     expect(media.map((asset) => asset.url).sort()).toEqual(Object.values(manifest).flat().map((asset) => asset.url).sort());
   });
 
@@ -51,12 +51,20 @@ describe("supplied portfolio", () => {
     expect(suppliedProjects.find((project) => project.slug === "solvanta-labs")?.gallery.map((asset) => asset.url)).toContain("/works/apex/04.webp");
     expect(suppliedProjects.find((project) => project.slug === "apex")?.gallery.map((asset) => asset.url)).not.toContain("/works/apex/04.webp");
   });
-  it("uses a non-pinned full-artwork grid for all 26 posters", () => {
+  it("uses a non-pinned full-artwork grid for the 10 remaining posters", () => {
     const posters = suppliedProjects.find((project) => project.slug === "posters-and-campaigns");
     expect(posters?.galleryLayout).toBe("grid");
-    expect(posters?.gallery).toHaveLength(26);
+    expect(posters?.gallery).toHaveLength(10);
   });
   it("has a persistent prepared image for every gallery entry", async () => {
     await Promise.all(media.map((asset) => access(path.join(process.cwd(), "public", ...asset.url.split("/").filter(Boolean)))));
+  });
+  it("matches the remaining originals and leaves no stale generated images", async () => {
+    for (const [folder, assets] of Object.entries(manifest)) {
+      const originals = (await readdir(path.join(process.cwd(), "works", folder))).filter((name) => /\.jpe?g$/i.test(name)).sort();
+      expect(assets.map((asset) => asset.source).sort()).toEqual(originals);
+      const prepared = (await readdir(path.join(process.cwd(), "public", "works", folder))).filter((name) => /^\d{2,}\.webp$/.test(name)).sort();
+      expect(prepared).toEqual(assets.map((asset) => path.basename(asset.url)).sort());
+    }
   });
 });
