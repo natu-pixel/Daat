@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import { useAnimate } from "motion/react";
 import { useMotionPreference } from "@/lib/use-motion-preference";
+import { playTextSweep, prepareTextSweep, settleTextSweep } from "@/lib/text-sweep";
 
 export function Reveal({ children, className, delay = 0, kind = "text" }: { children: React.ReactNode; className?: string; delay?: number; kind?: "text" | "image" }) {
   const reduced = useMotionPreference();
@@ -16,14 +17,17 @@ export function Reveal({ children, className, delay = 0, kind = "text" }: { chil
     if (reduced) {
       active.current?.stop();
       active.current = animate(element, { y: 0, scale: 1, opacity: 1 }, { duration: 0 });
+      settleTextSweep(element);
       return;
     }
     if (played.current) return;
+    prepareTextSweep(element);
     const observer = new IntersectionObserver(([entry]) => {
       if (!entry.isIntersecting) return;
       observer.disconnect();
       if (played.current) return;
       played.current = true;
+      playTextSweep(element, delay + .1);
       active.current = animate(element, {
         y: [kind === "image" ? 64 : 38, 0],
         scale: [kind === "image" ? .91 : .98, 1],
@@ -42,6 +46,7 @@ export function Reveal({ children, className, delay = 0, kind = "text" }: { chil
       played.current = true;
       active.current?.stop();
       active.current = animate(element, { y: 0, scale: 1, opacity: 1 }, { duration: 0 });
+      settleTextSweep(element);
     }
     target.addEventListener("focusin", settle);
     return () => target.removeEventListener("focusin", settle);

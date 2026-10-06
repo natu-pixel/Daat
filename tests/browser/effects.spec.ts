@@ -90,7 +90,7 @@ test("stationary and absent pointers let hero water fade back to a still image",
   });
   expect(Math.max(dimensions.width, dimensions.height)).toBeLessThanOrEqual(192);
   await expect(host).toHaveAttribute("data-water", "idle");
-  await expect(page.locator(".hero-building-image")).toHaveCSS("filter", "none");
+  await expect(page.locator(".hero-slides")).toHaveCSS("filter", "none");
   const texture = await host.locator("feImage").getAttribute("href");
   const still = await page.screenshot({ clip });
   await page.waitForTimeout(300);
@@ -100,7 +100,7 @@ test("stationary and absent pointers let hero water fade back to a still image",
   await expect(host).toHaveAttribute("data-water", "rippling");
   await page.mouse.move(0, 0);
   await expect(host).toHaveAttribute("data-water", "idle");
-  await expect(page.locator(".hero-building-image")).toHaveCSS("filter", "none");
+  await expect(page.locator(".hero-slides")).toHaveCSS("filter", "none");
 });
 
 test("footer particles animate within rendering caps and preserve pause intent across visibility", async ({ page }) => {
@@ -161,8 +161,8 @@ test("hero and footer fit desktop, tablet, and mobile and retain real destinatio
   for (const width of [1440, 768, 375]) {
     await page.setViewportSize({ width, height: width === 375 ? 812 : 1000 });
     await page.goto("/");
-    await expect(page.locator(".hero-building-image")).toBeVisible();
-    await expect.poll(() => page.locator(".hero-building-image").evaluate((image: HTMLImageElement) => image.complete && image.naturalWidth > 0)).toBe(true);
+    await expect(page.locator(".hero-building-image").first()).toBeVisible();
+    await expect.poll(() => page.locator(".hero-building-image").first().evaluate((image: HTMLImageElement) => image.complete && image.naturalWidth > 0)).toBe(true);
     await page.screenshot({ path: testInfo.outputPath(`hero-${width}.png`) });
     await page.locator(".footer").scrollIntoViewIfNeeded();
     await expect(page.locator(".footer-gradient")).toBeVisible();
@@ -203,7 +203,7 @@ test("gradient load failures are reported without losing footer navigation", asy
   await expect(page.locator(".footer .round-cta")).toBeVisible();
 });
 
-test("hero renderer errors stop motion and show the unfiltered building", async ({ page }) => {
+test("hero renderer errors stop motion and show the unfiltered slides", async ({ page }) => {
   await page.goto("/");
   const host = page.locator(".hero-artwork");
   await expect(host).toHaveAttribute("data-motion", "running");
@@ -214,7 +214,7 @@ test("hero renderer errors stop motion and show the unfiltered building", async 
   if (!bounds) throw new Error("Hero is not visible.");
   await page.mouse.move(bounds.x + bounds.width * .7, bounds.y + bounds.height * .5);
   await expect(page.locator(".hero-effect-controls").getByRole("status")).toContainText("couldn't start");
-  await expect(page.locator(".hero-building-image")).toHaveCSS("filter", "none");
+  await expect(page.locator(".hero-slides")).toHaveCSS("filter", "none");
   await expect(page.locator(".hero h1")).toBeVisible();
   await expect(page.getByRole("button", { name: /hero effect/ })).toHaveCount(0);
 });
@@ -237,7 +237,7 @@ test("mouse movement ripples the hero and shifts the footer, with pause and redu
   await page.goto("/");
   await page.addStyleTag({ content: "html { scroll-behavior: auto !important; }" });
   for (const section of [
-    { root: ".hero", host: ".hero-artwork", image: ".hero-building-image", name: "hero" },
+    { root: ".hero", host: ".hero-artwork", image: ".hero-slides", name: "hero" },
     { root: ".footer", host: ".footer-flow", image: ".footer-gradient", name: "footer" },
   ]) {
     const root = page.locator(section.root);

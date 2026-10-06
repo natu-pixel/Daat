@@ -125,7 +125,7 @@ test("reduced motion removes pinned gallery scrolling", async ({ page }) => {
   await expect(page.locator(".gallery-panel")).toHaveCount(5);
   await expect(page.locator(".gallery-progress")).toHaveCount(0);
   await expect(page.locator(".hero-artwork")).toHaveAttribute("data-motion", "paused");
-  await expect(page.locator(".hero-building-image")).toHaveCSS("filter", "none");
+  await expect(page.locator(".hero-slides")).toHaveCSS("filter", "none");
 });
 
 test("skip link and keyboard navigation work", async ({ page }) => {
@@ -192,6 +192,11 @@ test("all brand galleries have the correct project artwork", async ({ page }) =>
   for (const [slug, count] of [["aerograin", 8], ["pulsedock", 5], ["solvanta-labs", 9], ["apex", 4]] as const) {
     await page.goto(`/work/${slug}`);
     await expect(page.locator(".gallery-panel")).toHaveCount(count);
+    const transition = page.locator(".case-study > .section-transition.into-light");
+    await expect(transition).toHaveCount(1);
+    await expect(transition).toHaveAttribute("aria-hidden", "true");
+    expect(await transition.evaluate(element => element.previousElementSibling?.classList.contains("scroll-gallery"))).toBe(true);
+    await expect(page.locator(".case-next")).toHaveCSS("border-top-width", "0px");
     const image = page.locator(".gallery-panel img").first();
     await image.scrollIntoViewIfNeeded();
     await expect.poll(() => image.evaluate((element: HTMLImageElement) => element.complete && element.naturalWidth > 0)).toBe(true);
@@ -207,7 +212,7 @@ test("headlines and artwork remain visible without JavaScript", async ({ browser
     await expect(page.locator(".portfolio-stage-tile")).toHaveCount(3);
     await expect(page.locator(".scroll-gallery")).not.toHaveClass(/is-pinned/);
     await expect(page.locator(".gallery-panels")).toHaveCSS("display", "block");
-    await expect(page.locator(".hero-building-image")).toBeVisible();
+    await expect(page.locator(".hero-building-image").first()).toBeVisible();
     await expect(page.locator(".effect-toggle")).toHaveCount(0);
     await page.locator(".footer").scrollIntoViewIfNeeded();
     await expect(page.locator(".footer-gradient")).toBeVisible();
@@ -217,12 +222,14 @@ test("headlines and artwork remain visible without JavaScript", async ({ browser
   }
 });
 
-test("hero uses the supplied building, shaded copy, rounded corners, and effect controls", async ({ page, request }) => {
-  expect((await request.get("/building.jpg")).status()).toBe(200);
+test("hero slides through work covers, shaded copy, rounded corners, and effect controls", async ({ page }) => {
   await page.goto("/");
   const artwork = page.locator(".hero-artwork");
   await expect(artwork).toHaveAttribute("data-motion", "running");
-  await expect(page.locator(".hero-building-image")).toHaveAttribute("src", /building/);
+  await expect(page.locator(".hero-building-image").first()).toHaveAttribute("src", /works/);
+  const slides = page.locator(".hero-slides");
+  await expect(slides).toHaveAttribute("data-slide", "0");
+  await expect(slides).toHaveAttribute("data-slide", "1", { timeout: 8000 });
   await expect(page.locator(".hero-shade")).toHaveCSS("background-image", /linear-gradient/);
   expect(await page.locator(".hero").evaluate((element) => parseFloat(getComputedStyle(element).borderTopLeftRadius))).toBeGreaterThanOrEqual(22);
   await page.getByRole("button", { name: "Pause hero effect" }).click();
@@ -233,7 +240,7 @@ test("hero uses the supplied building, shaded copy, rounded corners, and effect 
   expect(await page.locator(".selected-work .project-visual").first().evaluate((element) => parseFloat(getComputedStyle(element).borderTopLeftRadius))).toBe(20);
 });
 
-test("reduced motion shows the building until motion is explicitly requested", async ({ page }) => {
+test("reduced motion keeps the hero still until motion is explicitly requested", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
   const videoRequests: string[] = [];
   page.on("request", (request) => { if (request.url().includes("studio-reel.mp4")) videoRequests.push(request.url()); });
@@ -248,8 +255,8 @@ test("reduced motion shows the building until motion is explicitly requested", a
   await expect(artwork).toHaveAttribute("data-motion", "paused");
 });
 
-test("building failures leave the hero copy and navigation visible with an explicit message", async ({ page }) => {
-  await page.route("**/*building*", (route) => route.abort());
+test("hero image failures leave the hero copy and navigation visible with an explicit message", async ({ page }) => {
+  await page.route("**/*works*", (route) => route.abort());
   await page.goto("/");
   await expect(page.locator(".hero-effect-controls .effect-status")).toContainText(/couldn't/);
   await expect(page.locator(".hero h1")).toBeVisible();
@@ -263,7 +270,7 @@ test("changing the motion preference pauses automatic effects and unpins the gal
   await expect(page.locator(".scroll-gallery")).toHaveClass(/is-pinned/);
   await page.emulateMedia({ reducedMotion: "reduce" });
   await expect(artwork).toHaveAttribute("data-motion", "paused");
-  await expect(page.locator(".hero-building-image")).toHaveCSS("filter", "none");
+  await expect(page.locator(".hero-slides")).toHaveCSS("filter", "none");
   await expect(page.locator(".scroll-gallery")).not.toHaveClass(/is-pinned/);
 });
 
@@ -274,12 +281,12 @@ test("homepage gradients soften section boundaries and respond to hover and focu
   for (const transition of await transitions.all()) {
     await expect(transition).toHaveAttribute("aria-hidden", "true");
     await expect(transition.locator("svg")).toHaveAttribute("preserveAspectRatio", "none");
-    await expect(transition.locator("linearGradient stop")).toHaveCount(3);
+    await expect(transition.locator("linearGradient stop")).toHaveCount(4);
     await expect(transition.locator("path")).toHaveAttribute("d", /C/);
     await expect(transition).toHaveCSS("pointer-events", "none");
     expect(await transition.evaluate((element) => element.getBoundingClientRect().height)).toBeGreaterThanOrEqual(96);
   }
-  for (const selector of [".portfolio-stage", ".selected-work", ".poster-preview", ".services-section", ".brand-strip"]) {
+  for (const selector of [".portfolio-stage", ".selected-work", ".poster-preview", ".services-section"]) {
     await expect(page.locator(selector)).toHaveCSS("background-image", /gradient/);
   }
   const project = page.locator(".selected-work .project-card").first();
@@ -356,7 +363,7 @@ test("logo-only ticker moves, pauses, and becomes static for reduced motion", as
   const paused = await position();
   await expect.poll(position).toBeCloseTo(paused, 2);
   await ticker.screenshot({ path: testInfo.outputPath("logo-ticker.png") });
-  await expect(page.locator(".hero-interlude [data-reveal=text]")).toHaveCSS("opacity", "1");
+  await expect(page.locator(".hero-interlude [data-reveal=text]").first()).toHaveCSS("opacity", "1");
   await page.locator(".hero-interlude").screenshot({ path: testInfo.outputPath("interlude.png") });
   await page.getByRole("button", { name: "Resume logo ticker" }).click();
   await page.mouse.move(0, 0);
@@ -391,4 +398,19 @@ test("keyboard focus immediately settles a project reveal", async ({ page }) => 
     return positions;
   });
   expect(positions.every((position) => Math.abs(position) < 1)).toBe(true);
+});
+
+test("announcement bar slides above the header and impact numbers count up", async ({ page }) => {
+  await page.goto("/");
+  const announcement = page.getByRole("link", { name: /We partner with just 3 clients/ });
+  await expect(announcement).toHaveAttribute("href", "/contact");
+  const track = page.locator(".announcement-track");
+  const position = () => track.evaluate((element) => new DOMMatrix(getComputedStyle(element).transform).m41);
+  const start = await position();
+  await expect.poll(position).toBeLessThan(start - 2);
+  const stats = page.locator(".impact-stats dd [aria-hidden=true]");
+  await expect(stats).toHaveText(["0+", "0+", "$0k+"]);
+  await page.locator(".impact-stats").scrollIntoViewIfNeeded();
+  await expect(stats).toHaveText(["50+", "10+", "$10k+"], { timeout: 5000 });
+  await expect(page.locator(".impact-partners-box").getByRole("region", { name: "Selected project logos" })).toBeVisible();
 });

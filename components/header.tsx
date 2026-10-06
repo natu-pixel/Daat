@@ -39,7 +39,7 @@ export function Header() {
           <Link key={href} href={href} aria-current={pathname.startsWith(href) ? "page" : undefined} onClick={() => setOpen(false)}>{label}</Link>
         ))}
         <Link href="/contact" className="nav-contact" aria-current={pathname === "/contact" ? "page" : undefined} onClick={() => setOpen(false)}>
-          Let&apos;s talk <span aria-hidden="true">↗</span>
+          Let&apos;s talk <span aria-hidden="true">→</span>
         </Link>
       </nav>
     </header>

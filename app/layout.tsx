@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import { draftMode } from "next/headers";
 import { Header } from "@/components/header";
+import { AnnouncementBar } from "@/components/announcement-bar";
 import { Footer } from "@/components/footer";
 import "./globals.css";
 
@@ -33,6 +34,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       <body>
         <a href="#main" className="skip-link">Skip to content</a>
         {isEnabled && <div className="preview-banner">Draft preview <a href="/api/draft/disable">Exit preview</a></div>}
+        <AnnouncementBar />
         <Header />
         <main id="main">{children}</main>
         <Footer />

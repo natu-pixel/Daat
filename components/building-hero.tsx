@@ -1,16 +1,19 @@
 "use client";
 
 import Image from "next/image";
-import { useCallback, useId, useRef, useState } from "react";
+import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { useDecorativeLoop, useDecorativeMotion, type DecorativePointer } from "@/lib/use-decorative-motion";
 import { maxWaterRipples, paintWaterMap, waterDisplacementScale, waterNeutralOffset, waterRippleLifetime, type WaterRipple } from "@/lib/water-ripples";
 
 type WaterTexture = { canvas: HTMLCanvasElement; context: CanvasRenderingContext2D; pixels: ImageData };
+export type HeroSlide = { url: string; alt: string; width?: number | null; height?: number | null };
 
-export function BuildingHero() {
+const slideInterval = 5000;
+
+export function BuildingHero({ slides = [] }: { slides?: HeroSlide[] }) {
   const id = `hero-liquid-${useId().replace(/:/g, "")}`;
   const displacementImage = useRef<SVGFEImageElement>(null);
-  const image = useRef<HTMLImageElement>(null);
+  const image = useRef<HTMLDivElement>(null);
   const water = useRef<{
     ripples: WaterRipple[];
     lastPoint: { x: number; y: number; time: number } | null;
@@ -20,6 +23,23 @@ export function BuildingHero() {
   const { hydrated, enabled, toggle } = useDecorativeMotion();
   const [loaded, setLoaded] = useState(false);
   const [error, setError] = useState("");
+  const frames = slides.length ? slides : [{ url: "/building.jpg", alt: "" }];
+  const looping = frames.length > 1;
+  const [slide, setSlide] = useState({ index: 0, animate: true });
+  useEffect(() => {
+    if (!looping || !enabled) return;
+    const timer = window.setInterval(() => setSlide(current => ({ index: current.index >= frames.length ? 1 : current.index + 1, animate: true })), slideInterval);
+    return () => window.clearInterval(timer);
+  }, [looping, enabled, frames.length]);
+  useEffect(() => {
+    if (slide.animate) return;
+    const frame = requestAnimationFrame(() => requestAnimationFrame(() => setSlide(current => ({ ...current, animate: true }))));
+    return () => cancelAnimationFrame(frame);
+  }, [slide.animate]);
+  const finishSlide = () => {
+    // The track ends with a copy of the first slide so the loop always moves forward.
+    if (slide.index === frames.length) setSlide({ index: 0, animate: false });
+  };
   const draw = useCallback((time: number, pointer: DecorativePointer) => {
     const artwork = image.current;
     const map = displacementImage.current;
@@ -98,21 +118,36 @@ export function BuildingHero() {
             </filter>
           </defs>
         </svg>
-        <Image
+        <div
           ref={image}
-          src="/building.jpg"
-          alt=""
-          fill
-          priority
-          sizes="100vw"
-          className="hero-building-image"
+          className="hero-slides"
+          data-slide={slide.index % frames.length}
           style={{ filter: enabled && loaded && !error ? undefined : "none" }}
-          onLoad={() => setLoaded(true)}
-          onError={() => {
-            console.error("Hero building image could not be loaded.");
-            setError("The building image couldn't load. Please refresh to try again.");
-          }}
-        />
+        >
+          <div
+            className="hero-slides-track"
+            style={{ transform: `translateX(-${slide.index * 100}%)`, transition: slide.animate ? undefined : "none" }}
+            onTransitionEnd={(event) => { if (event.target === event.currentTarget) finishSlide(); }}
+          >
+            {[...frames, ...(looping ? [frames[0]] : [])].map((frame, index) => <div className="hero-slide" key={`${frame.url}-${index}`}>
+              {/* Later slides wait for the first image so it loads as fast as a single hero image would. */}
+              {(index === 0 || loaded) && <Image
+                src={frame.url}
+                alt=""
+                fill
+                priority={index === 0}
+                loading={index === 0 ? undefined : "eager"}
+                sizes="100vw"
+                className="hero-building-image"
+                onLoad={index === 0 ? () => setLoaded(true) : undefined}
+                onError={index === 0 ? () => {
+                  console.error("Hero image could not be loaded.");
+                  setError("The hero image couldn't load. Please refresh to try again.");
+                } : undefined}
+              />}
+            </div>)}
+          </div>
+        </div>
         <svg className="hero-grain" width="100%" height="100%" focusable="false">
           <rect width="100%" height="100%" filter={`url(#${id}-grain)`} />
         </svg>
