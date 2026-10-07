@@ -16,5 +16,5 @@ export function HeroHeadline({ headline }: { headline: string }) {
     else playTextSweep(scope.current, .05);
     return () => controls.stop();
   }, [animate, reduced, scope]);
-  return <h1 ref={scope}>{headline.split("\n").map((line, index) => <span className="hero-line" key={index}><span className="hero-line-text" data-sweep>{line}</span></span>)}</h1>;
+  return <h1 ref={scope}>{headline.split("\n").map((line, index) => <span className="hero-line" key={index}><span className="hero-line-text text-gradient" data-sweep>{line}</span></span>)}</h1>;
 }

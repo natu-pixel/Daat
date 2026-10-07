@@ -51,6 +51,20 @@ describe("cursor water refraction", () => {
     expect(painted).toBeLessThan(32 * 32 / 4);
   });
 
+  it("adds subtle frame-varying noise only inside active ripples", () => {
+    const at = (time: number) => { const pixels = new Uint8ClampedArray(32 * 32 * 4); paintWaterMap(pixels, 32, 32, 1000, 1000, [ripple], time); return pixels; };
+    const a = at(.2);
+    const b = at(.2 + 1 / 24);
+    const c = at(.2);
+    expect(Array.from(a)).toEqual(Array.from(c));
+    let differs = 0;
+    for (let i = 0; i < a.length; i += 4) {
+      if (!a[i + 3] && !b[i + 3]) expect([a[i], a[i + 1]]).toEqual([128, 128]);
+      if (a[i] !== b[i] || a[i + 1] !== b[i + 1]) differs++;
+    }
+    expect(differs).toBeGreaterThan(0);
+  });
+
   it("rejects invalid texture sizes and excessive ripple counts explicitly", () => {
     expect(() => paintWaterMap(new Uint8ClampedArray(16), 2, 3, 1000, 1000, [], 0)).toThrow();
     expect(() => paintWaterMap(new Uint8ClampedArray(193 * 4), 193, 1, 1000, 1000, [], 0)).toThrow();

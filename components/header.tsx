@@ -30,7 +30,6 @@ export function Header() {
   return (
     <header className="header">
       <Link href="/" className="brand-link" aria-label="DAAT home" onClick={() => setOpen(false)}><Wordmark /></Link>
-      <span className="header-descriptor">Independent thinking.<br />Connected design.</span>
       <button ref={button} className="menu-toggle" aria-expanded={open} aria-controls="main-navigation" onClick={() => setOpen(!open)}>
         {open ? "Close −" : "Menu +"}
       </button>

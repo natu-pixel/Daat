@@ -34,7 +34,7 @@ test("desktop gallery travels exactly from the first to the last panel", async (
   await expect.poll(translation).toBeCloseTo(-measurements.width * 2, 0);
   const progress = page.locator(".gallery-progress > div");
   await expect.poll(() => progress.evaluate((element) => new DOMMatrix(getComputedStyle(element).transform).m11)).toBeCloseTo(.5, 2);
-  await page.evaluate((top) => window.scrollTo(0, top), measurements.top + measurements.distance);
+  await page.evaluate((top) => window.scrollTo(0, Math.ceil(top)), measurements.top + measurements.distance);
   await expect.poll(translation).toBeCloseTo(-measurements.width * 4, 0);
   await expect.poll(() => page.locator(".gallery-panel").last().evaluate((element) => element.getBoundingClientRect().left)).toBeCloseTo(0, 0);
   await page.setViewportSize({ width: 1280, height: 900 });
@@ -43,7 +43,7 @@ test("desktop gallery travels exactly from the first to the last panel", async (
     distance: element.getBoundingClientRect().height - window.innerHeight,
     width: element.querySelector(".gallery-sticky")!.getBoundingClientRect().width,
   }));
-  await page.evaluate((top) => window.scrollTo(0, top), resized.top + resized.distance);
+  await page.evaluate((top) => window.scrollTo(0, Math.ceil(top)), resized.top + resized.distance);
   await expect.poll(translation).toBeCloseTo(-resized.width * 4, 0);
   await page.screenshot({ path: testInfo.outputPath("gallery-last.png") });
 });
@@ -99,7 +99,7 @@ test("mobile navigation and gallery remain usable", async ({ page }, testInfo) =
   await page.setViewportSize({ width: 375, height: 812 });
   await page.goto("/");
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
-  await expect(page.locator(".hero-building .hero-topline .eyebrow")).toBeVisible();
+  await expect(page.locator(".hero-building .hero-content .pill-link")).toBeVisible();
   await expect(page.locator(".gallery-sticky")).toHaveCSS("position", "relative");
   await expect(page.locator(".gallery-panels")).toHaveCSS("display", "block");
   await page.getByRole("button", { name: "Menu +" }).click();
@@ -161,7 +161,7 @@ test("supplied portfolio images, categories, and poster grid are available", asy
   await page.goto("/");
   await expect(page.locator(".portfolio-stage-tile")).toHaveCount(3);
   await expect(page.locator(".selected-work .project-card")).toHaveCount(5);
-  await expect(page.locator(".poster-preview-image")).toHaveCount(8);
+  await expect(page.locator(".poster-wall-group:not([aria-hidden]) .poster-preview-image:visible")).toHaveCount(10);
   await page.locator(".portfolio-stage").scrollIntoViewIfNeeded();
   await expect(page.locator(".portfolio-stage-image").first()).toHaveCSS("opacity", "1");
   await page.locator(".portfolio-stage").screenshot({ path: testInfo.outputPath("portfolio-wall.png") });
@@ -280,11 +280,9 @@ test("homepage gradients soften section boundaries and respond to hover and focu
   await expect(transitions).toHaveCount(2);
   for (const transition of await transitions.all()) {
     await expect(transition).toHaveAttribute("aria-hidden", "true");
-    await expect(transition.locator("svg")).toHaveAttribute("preserveAspectRatio", "none");
-    await expect(transition.locator("linearGradient stop")).toHaveCount(4);
-    await expect(transition.locator("path")).toHaveAttribute("d", /C/);
+    await expect(transition).toHaveCSS("background-image", /linear-gradient/);
     await expect(transition).toHaveCSS("pointer-events", "none");
-    expect(await transition.evaluate((element) => element.getBoundingClientRect().height)).toBeGreaterThanOrEqual(96);
+    expect(await transition.evaluate((element) => element.getBoundingClientRect().height)).toBeGreaterThanOrEqual(200);
   }
   for (const selector of [".portfolio-stage", ".selected-work", ".poster-preview", ".services-section"]) {
     await expect(page.locator(selector)).toHaveCSS("background-image", /gradient/);
