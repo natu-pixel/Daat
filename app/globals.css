@@ -470,7 +470,8 @@ a:is(:hover, :focus-visible) .web-tile-art small { color: var(--cyan); }
 .homepage .service-row::before { content: ""; position: absolute; inset: 8px -14px; border-radius: var(--radius-md); z-index: -1; background: linear-gradient(105deg, #a2e8f940, #99bcff26 60%, #2a41f10d); opacity: 0; transition: opacity .35s ease; pointer-events: none; }
 .homepage .service-row:is(:hover, :focus-visible)::before { opacity: 1; }
 .services-split { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 2.1fr); gap: clamp(24px, 3vw, 48px); padding: 60px var(--gutter); background: var(--white); }
-.services-media { min-height: 560px; border-radius: var(--radius-md); background: radial-gradient(ellipse at 10% 65%, #a2e8f93d, transparent 58%), linear-gradient(180deg, var(--white), #e4effa); }
+.services-media { position: relative; min-height: 560px; overflow: hidden; border-radius: var(--radius-md); background: radial-gradient(ellipse at 10% 65%, #a2e8f93d, transparent 58%), linear-gradient(180deg, var(--white), #e4effa); }
+.services-image { object-fit: cover; }
 .services-content { min-width: 0; display: flex; flex-direction: column; }
 .services-intro { padding-bottom: 36px; }
 .services-intro .eyebrow { font-size: var(--step--1); letter-spacing: 0; }

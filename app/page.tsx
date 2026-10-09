@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { getContent } from "@/lib/content";
 import { ProjectCard } from "@/components/project-card";
 import { ScrollGallery } from "@/components/scroll-gallery";
@@ -64,7 +65,9 @@ export default async function Home() {
       {hasGallery && <SectionTransition direction="into-light" />}
       {posterProject && <PosterPreview project={posterProject} />}
       <div className="services-split">
-        <div className="services-media" aria-hidden="true" />
+        <div className="services-media">
+          <Image src="/BPT.jpg" alt="BPT brand project" fill sizes="(max-width: 900px) 100vw, 32vw" className="services-image" />
+        </div>
         <div className="services-content">
           <Reveal><div className="services-intro">
             <span className="eyebrow"><i className="status-dot" /> Our Work</span>
