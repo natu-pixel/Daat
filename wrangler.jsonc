@@ -2,6 +2,9 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "daat",
   "main": ".open-next/worker.js",
+  "build": {
+    "command": "npm run build:cloudflare"
+  },
   "compatibility_date": "2026-10-10",
   "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
   "workers_dev": false,
