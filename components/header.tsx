@@ -28,7 +28,7 @@ export function Header() {
   }, [open]);
 
   return (
-    <header className="header">
+    <header className={`header ${pathname === "/" ? "homepage-header" : ""}`}>
       <Link href="/" className="brand-link" aria-label="DAAT home" onClick={() => setOpen(false)}><Wordmark /></Link>
       <button ref={button} className="menu-toggle" aria-expanded={open} aria-controls="main-navigation" onClick={() => setOpen(!open)}>
         {open ? "Close −" : "Menu +"}

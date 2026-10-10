@@ -16,6 +16,12 @@ import { CountUp } from "@/components/count-up";
 
 export const metadata: Metadata = { alternates: { canonical: "/" } };
 
+const heroSlides = [
+  { url: "/hero/2%20(2).jpg", alt: "DAAT featured project" },
+  { url: "/hero/3%20(2).jpg", alt: "DAAT featured project" },
+  { url: "/hero/vcb.jpg", alt: "DAAT featured project" },
+];
+
 export default async function Home() {
   const { settings, projects, services } = await getContent();
   const studioProject = projects.find((project) => project.studioStudy);
@@ -26,7 +32,7 @@ export default async function Home() {
   return (
     <div className="homepage">
       <section className="hero hero-building">
-        <BuildingHero slides={clientProjects.flatMap((project) => project.cover ? [project.cover] : [])} />
+        <BuildingHero slides={heroSlides} />
         <div className="hero-shade" aria-hidden="true" />
         <div className="hero-content">
           <div className="hero-headline"><HeroHeadline headline={settings.headline} /></div>
