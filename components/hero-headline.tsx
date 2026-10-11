@@ -11,7 +11,7 @@ export function HeroHeadline({ headline }: { headline: string }) {
   useEffect(() => {
     const controls = reduced
       ? animate(".hero-line-text", { y: 0, opacity: 1 }, { duration: 0 })
-      : animate(".hero-line-text", { y: [28, 0], opacity: [.6, 1] }, { duration: .8, delay: stagger(.12), ease: [.2, .8, .2, 1] });
+      : animate(".hero-line-text", { y: [28, 0], opacity: [0, 1] }, { duration: 1.6, delay: stagger(.22), ease: [.2, .8, .2, 1] });
     if (reduced) settleTextSweep(scope.current);
     else playTextSweep(scope.current, .05);
     return () => controls.stop();

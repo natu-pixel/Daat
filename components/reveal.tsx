@@ -28,11 +28,12 @@ export function Reveal({ children, className, delay = 0, kind = "text" }: { chil
       if (played.current) return;
       played.current = true;
       playTextSweep(element, delay + .1);
+      const text = kind !== "image";
       active.current = animate(element, {
         y: [kind === "image" ? 64 : 38, 0],
         scale: [kind === "image" ? .91 : .98, 1],
-        opacity: [.15, 1],
-      }, { type: "spring", duration: .9, bounce: .2, delay, opacity: { type: "tween", duration: .55, delay } });
+        opacity: [text ? 0 : .15, 1],
+      }, { type: "spring", duration: text ? 1.4 : .9, bounce: .2, delay, opacity: { type: "tween", duration: text ? .95 : .55, delay } });
     }, { threshold: .12, rootMargin: "0px 0px -30px 0px" });
     observer.observe(element);
     return () => { observer.disconnect(); active.current?.stop(); };

@@ -226,7 +226,7 @@ test("hero slides through work covers, shaded copy, rounded corners, and effect 
   await page.goto("/");
   const artwork = page.locator(".hero-artwork");
   await expect(artwork).toHaveAttribute("data-motion", "running");
-  await expect(page.locator(".hero-building-image").first()).toHaveAttribute("src", /works/);
+  await expect(page.locator(".hero-building-image").first()).toHaveAttribute("src", /hero/);
   const slides = page.locator(".hero-slides");
   await expect(slides).toHaveAttribute("data-slide", "0");
   await expect(slides).toHaveAttribute("data-slide", "1", { timeout: 8000 });
@@ -256,7 +256,7 @@ test("reduced motion keeps the hero still until motion is explicitly requested",
 });
 
 test("hero image failures leave the hero copy and navigation visible with an explicit message", async ({ page }) => {
-  await page.route("**/*works*", (route) => route.abort());
+  await page.route("**/*hero*", (route) => route.abort());
   await page.goto("/");
   await expect(page.locator(".hero-effect-controls .effect-status")).toContainText(/couldn't/);
   await expect(page.locator(".hero h1")).toBeVisible();

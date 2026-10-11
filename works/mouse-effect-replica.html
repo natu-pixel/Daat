@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Orbit Parallax — mouse interaction replica</title>
+<style>
+  /* ---------- stage ---------- */
+  :root {
+    --bg: #060608;
+    --ring: rgba(255, 255, 255, 0.13);
+    --ring-strong: rgba(255, 255, 255, 0.22);
+    --arc: #ff7a1a;
+    --planet-1: #3a3a3d;
+    --planet-2: #17171a;
+    --planet-3: #0b0b0d;
+    --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    min-height: 100vh;
+    display: grid;
+    place-items: center;
+    background: var(--bg);
+    color: #fff;
+    font-family: "Inter", "Helvetica Neue", Arial, sans-serif;
+    overflow: hidden;
+  }
+
+  /* faint starfield so the space reads like the recording */
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background-image:
+      radial-gradient(1px 1px at 12% 22%, rgba(255, 255, 255, 0.5), transparent 60%),
+      radial-gradient(1px 1px at 78% 12%, rgba(255, 255, 255, 0.35), transparent 60%),
+      radial-gradient(1.5px 1.5px at 62% 68%, rgba(255, 255, 255, 0.4), transparent 60%),
+      radial-gradient(1px 1px at 28% 82%, rgba(255, 255, 255, 0.3), transparent 60%),
+      radial-gradient(1px 1px at 88% 46%, rgba(255, 255, 255, 0.45), transparent 60%),
+      radial-gradient(1px 1px at 44% 36%, rgba(255, 255, 255, 0.25), transparent 60%),
+      radial-gradient(1px 1px at 8% 58%, rgba(255, 255, 255, 0.3), transparent 60%),
+      radial-gradient(1.5px 1.5px at 70% 88%, rgba(255, 255, 255, 0.3), transparent 60%);
+    pointer-events: none;
+  }
+
+  /* ---------- the portfolio stage ---------- */
+  .orbit-stage {
+    position: relative;
+    width: min(78vmin, 640px);
+    aspect-ratio: 1;
+    display: grid;
+    place-items: center;
+    text-decoration: none;
+    color: inherit;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .orbit-stage:focus-visible { outline: 1px solid var(--arc); outline-offset: 18px; border-radius: 50%; }
+
+  /* every moving layer shares the parallax transform */
+  .layer {
+    position: absolute;
+    inset: 0;
+    will-change: transform;
+    transition: opacity 0.6s var(--ease);
+  }
+
+  /* concentric orbit rings */
+  .ring {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    border: 1px solid var(--ring);
+    border-radius: 50%;
+    translate: -50% -50%;
+  }
+
+  .ring--outer  { width: 100%;  height: 100%; }
+  .ring--middle { width: 76%;  height: 76%;  border-color: rgba(255, 255, 255, 0.1); }
+  .ring--inner  { width: 52%;  height: 52%;  border-color: rgba(255, 255, 255, 0.16); }
+
+  /* the orange arc: only a segment of the border is lit, and it slowly rotates */
+  .arc {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 100%;
+    height: 100%;
+    border: 1px solid transparent;
+    border-top-color: var(--arc);
+    border-right-color: var(--arc);
+    border-radius: 50%;
+    translate: -50% -50%;
+    opacity: 0.9;
+    animation: arc-spin 9s linear infinite;
+    filter: drop-shadow(0 0 6px rgba(255, 122, 26, 0.45));
+    transition: opacity 0.5s var(--ease), filter 0.5s var(--ease);
+  }
+
+  @keyframes arc-spin { to { rotate: 360deg; } }
+
+  /* ---------- the portfolio image (the planet) ---------- */
+  .planet {
+    position: relative;
+    width: 34%;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    overflow: hidden;
+    background:
+      radial-gradient(circle at 32% 28%, var(--planet-1) 0%, var(--planet-2) 46%, var(--planet-3) 100%);
+    box-shadow:
+      inset -14px -10px 34px rgba(0, 0, 0, 0.75),
+      inset 8px 6px 22px rgba(255, 255, 255, 0.05),
+      0 24px 60px rgba(0, 0, 0, 0.55);
+    transition: scale 0.6s var(--ease), box-shadow 0.6s var(--ease);
+    will-change: transform;
+  }
+
+  /* drop your own artwork in here; the gradient above is the fallback */
+  .planet img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    border-radius: 50%;
+  }
+
+  /* soft atmosphere rim so the disc reads as a lit body */
+  .planet::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: radial-gradient(circle at 68% 74%, rgba(255, 255, 255, 0.07), transparent 46%);
+    pointer-events: none;
+  }
+
+  .orbit-stage:hover .planet,
+  .orbit-stage:focus-visible .planet {
+    scale: 1.06;
+    box-shadow:
+      inset -14px -10px 34px rgba(0, 0, 0, 0.7),
+      inset 8px 6px 22px rgba(255, 255, 255, 0.07),
+      0 30px 70px rgba(0, 0, 0, 0.6),
+      0 0 0 1px rgba(255, 255, 255, 0.08);
+  }
+
+  .orbit-stage:hover .arc,
+  .orbit-stage:focus-visible .arc {
+    opacity: 1;
+    filter: drop-shadow(0 0 12px rgba(255, 122, 26, 0.8));
+  }
+
+  /* label that fades in on hover, like a portfolio caption */
+  .stage-label {
+    position: absolute;
+    bottom: 4%;
+    left: 50%;
+    translate: -50% 0;
+    font-size: clamp(10px, 1.4vmin, 13px);
+    letter-spacing: 0.42em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.55);
+    opacity: 0;
+    transition: opacity 0.5s var(--ease), translate 0.5s var(--ease);
+    pointer-events: none;
+    white-space: nowrap;
+  }
+
+  .orbit-stage:hover .stage-label,
+  .orbit-stage:focus-visible .stage-label { opacity: 1; translate: -50% -6px; }
+
+  /* ---------- headline with the hover sweep seen in the recording ---------- */
+  .headline {
+    position: fixed;
+    top: 8%;
+    left: 6%;
+    max-width: 20ch;
+    font-size: clamp(28px, 5.4vw, 64px);
+    font-weight: 800;
+    line-height: 0.98;
+    letter-spacing: -0.02em;
+    text-transform: uppercase;
+  }
+
+  .eyebrow {
+    display: block;
+    font-size: 0.24em;
+    letter-spacing: 0.3em;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.65);
+    margin-bottom: 0.9em;
+  }
+
+  /* the sweep: a blue gradient wipes left-to-right over each word on hover */
+  .sweep {
+    background-image: linear-gradient(90deg, #fff 0 34%, #6f8dff 46%, #2a41f1 56%, #fff 70%);
+    background-size: 300% 100%;
+    background-position: 100% 0;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+    transition: background-position 0.1s;
+  }
+
+  .sweep:hover,
+  .sweep:focus-visible {
+    animation: text-sweep 1.1s cubic-bezier(0.45, 0, 0.2, 1) both;
+  }
+
+  @keyframes text-sweep {
+    from { background-position: 100% 0; }
+    to   { background-position: 0 0; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .arc { animation: none; }
+    .layer { transition: none; }
+    .sweep:hover { animation: none; }
+    .planet, .stage-label { transition: none; }
+  }
+</style>
+</head>
+<body>
+
+  <h1 class="headline">
+    <span class="eyebrow">One operator</span>
+    Every leg of <span class="sweep" tabindex="0">the journey</span>
+  </h1>
+
+  <!-- The portfolio visual. The whole stage is the redirect target. -->
+  <a class="orbit-stage" href="https://example.com/portfolio/unitedcarriers" data-depth-planet="1" aria-label="UnitedCarriers — view project">
+    <div class="layer" data-depth="16">
+      <div class="ring ring--outer"></div>
+      <div class="ring ring--middle"></div>
+      <div class="ring ring--inner"></div>
+    </div>
+    <div class="layer" data-depth="40">
+      <div class="arc"></div>
+    </div>
+    <div class="layer" data-depth="72">
+      <div class="planet">
+        <!-- put your own image here: <img src="..." alt="" /> -->
+      </div>
+    </div>
+    <span class="stage-label">UnitedCarriers</span>
+  </a>
+
+<script>
+ (() => {
+    const stage = document.querySelector(".orbit-stage");
+    const layers = [...stage.querySelectorAll(".layer")];
+    const label = stage.querySelector(".stage-label");
+
+    // No parallax for touch or reduced-motion users; hover styles still apply.
+    const fine = window.matchMedia("(pointer: fine)").matches;
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (!fine || reduced) return;
+
+    // Pointer position in -1..1 across the viewport, eased toward every frame.
+    const target = { x: 0, y: 0 };
+    const current = { x: 0, y: 0 };
+    const ease = 0.075;           // lower = heavier, lazier follow
+    const rotateAmount = 1.6;     // degrees of ring counter-roll at full deflection
+
+    // Until the first mouse move the layers drift on a slow figure-eight so the
+    // parallax is visible on load. Set to false to match the recording exactly.
+    const idleDrift = true;
+    let interacted = false;
+    let started = performance.now();
+
+    window.addEventListener("pointermove", (event) => {
+      interacted = true;
+      target.x = (event.clientX / window.innerWidth) * 2 - 1;
+      target.y = (event.clientY / window.innerHeight) * 2 - 1;
+    }, { passive: true });
+
+    window.addEventListener("pointerleave", () => { target.x = 0; target.y = 0; });
+    document.addEventListener("mouseleave", () => { target.x = 0; target.y = 0; });
+
+    let frame = 0;
+    const tick = (now) => {
+      if (idleDrift && !interacted) {
+        const t = (now - started) / 1000;
+        target.x = Math.sin(t * 0.55) * 0.8;
+        target.y = Math.cos(t * 0.4) * 0.55;
+      }
+      current.x += (target.x - current.x) * ease;
+      current.y += (target.y - current.y) * ease;
+
+      for (const layer of layers) {
+        const depth = Number(layer.dataset.depth) || 0;
+        const x = current.x * depth;
+        const y = current.y * depth;
+        // Outer layers drift less and counter-roll; the planet leads the motion.
+        const roll = current.x * rotateAmount * (depth < 20 ? 1 : -0.35);
+        layer.style.transform = `translate3d(${x.toFixed(2)}px, ${y.toFixed(2)}px, 0) rotate(${roll.toFixed(3)}deg)`;
+      }
+      frame = requestAnimationFrame(tick);
+    };
+    tick(performance.now());
+
+    // Redirection is a real link; this only adds the press feedback.
+    stage.addEventListener("click", (event) => {
+      if (event.metaKey || event.ctrlKey || event.shiftKey) return; // let new-tab clicks through
+      label.style.opacity = "0";
+    });
+  })();
+</script>
+</body>
+</html>

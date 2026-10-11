@@ -17,9 +17,10 @@ import { CountUp } from "@/components/count-up";
 export const metadata: Metadata = { alternates: { canonical: "/" } };
 
 const heroSlides = [
-  { url: "/hero/2%20(2).jpg", alt: "DAAT featured project" },
-  { url: "/hero/3%20(2).jpg", alt: "DAAT featured project" },
-  { url: "/hero/vcb.jpg", alt: "DAAT featured project" },
+  { url: "/hero/01.webp", alt: "DAAT featured project" },
+  { url: "/hero/02.webp", alt: "DAAT featured project" },
+  { url: "/hero/03.webp", alt: "DAAT featured project" },
+  { url: "/hero/04.webp", alt: "DAAT featured project" },
 ];
 
 export default async function Home() {

@@ -98,7 +98,7 @@ The booking API rechecks the selected slot before inserting an event and limits 
 
 ### Building hero, particle footer, and rounded surfaces
 
-The homepage uses [building.jpg](./public/building.jpg) with cursor-driven water refraction and subtle static grain, inspired by [the hero reference](./public/hero%20section%20effect.mp4). Mouse movement leaves expanding radial ripples in the image, not a whole-image wobble or translation. Each wave fades over 1.6 seconds; a stationary or absent pointer leaves the image still after the waves settle. A small canvas produces a two-channel displacement texture consumed by SVG; its longest edge is capped at 192 pixels, with at most six live waves and 24 image-space pixels of displacement per channel. No texture encoding occurs when idle. The artwork is overscanned to hide warped edges. Only the artwork is distorted: the CMS headline, the "Explore our work" link, and controls stay sharp. The headline and link sit in the bottom-left corner over a soft corner shade, leaving the rest of the image clear. Image panels, portfolio tiles, poster images, and brand cards share rounded-corner tokens in [app/globals.css](./app/globals.css).
+The homepage slides through the stills in [public/hero](./public/hero) (falling back to [building.jpg](./public/building.jpg) when no slides are configured) with cursor-driven water refraction and subtle static grain, inspired by [the hero reference](./public/hero%20section%20effect.mp4). Mouse movement leaves expanding radial ripples in the image, not a whole-image wobble or translation. Each wave fades over 1.6 seconds; a stationary or absent pointer leaves the image still after the waves settle. A small canvas produces a two-channel displacement texture consumed by SVG; its longest edge is capped at 192 pixels, with at most six live waves and 24 image-space pixels of displacement per channel. No texture encoding occurs when idle. The artwork is overscanned to hide warped edges. Only the artwork is distorted: the CMS headline, the "Explore our work" link, and controls stay sharp. The headline and link sit in the bottom-left corner over a soft corner shade, leaving the rest of the image clear. Image panels, portfolio tiles, poster images, and brand cards share rounded-corner tokens in [app/globals.css](./app/globals.css).
 
 The global footer uses [gradiant.jpg](./public/gradiant.jpg), dense irregular canvas particle clouds curling along its edges, compact utility rows, and an oversized DAAT invitation inspired by [the footer reference](./public/footer%20effect.mp4). Particle positions are seeded rather than laid out on a dot grid, with a responsive budget of 12 particles per CSS pixel of width, capped at 14,000. A short atmospheric band and a masked top fade avoid an empty panel or hard seam. It retains the contact, home, and privacy destinations and original DAAT wordmark. The recordings are references only; their footage and branding are not embedded.
 
@@ -117,6 +117,16 @@ npm run assets:hero
 ```
 
 Place exactly one MP4 in [works/video](./works/video). This optional legacy command copies it to [public/hero](./public/hero) and extracts a still poster using installed Edge (or the `PW_BROWSER_CHANNEL` setting). The original is not modified. It is not required for the current building hero.
+
+#### Hero stills
+
+The homepage hero cycles through the stills in [public/hero](./public/hero) (`01.webp`, `02.webp`, `03.webp`, `04.webp`), in that order; the slide list in [app/page.tsx](./app/page.tsx) points at those files. The untouched originals live in [works/hero](./works/hero).
+
+```powershell
+npm run assets:hero-stills
+```
+
+This optimizes each image already in `public/hero` in place, after replacing files there: WebP stays WebP and JPEG stays JPEG, each resized to at most 2560 pixels wide without enlarging it, preserving proportions and EXIF orientation. Images already at or below that size are skipped, so repeated runs are safe. OneDrive can transiently reject writes, so replacement retries and then falls back to the shell API. Source artwork in `works/hero` is never modified. The hero artwork is overscanned by the water effect, so keep the focal subject centered and clear of the outer edges.
 
 Motion preference is subscribed through `useSyncExternalStore`, using a still server-rendered default and reacting to live operating-system preference changes. This avoids the installed Motion version's snapshot-only reduced-motion hook and keeps the decorative effects, gallery, headlines, and card reveals consistent.
 

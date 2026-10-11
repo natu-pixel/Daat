@@ -5,6 +5,7 @@
   "scripts": {
     "assets:works": "node scripts/prepare-works.mjs",
     "assets:hero": "node scripts/prepare-hero.mjs",
+    "assets:hero-stills": "node scripts/prepare-hero-stills.mjs",
     "assets:brand": "node scripts/prepare-brand.mjs",
     "dev": "next dev",
     "build": "next build",
@@ -21,13 +22,10 @@
   },
   "dependencies": {
     "@sanity/client": "8.9.0",
-    "@upstash/ratelimit": "2.2.0",
-    "@upstash/redis": "1.39.0",
     "motion": "12.43.0",
     "next": "16.3.8",
     "react": "19.3.0",
     "react-dom": "19.3.0",
-    "resend": "6.32.0",
     "sanity": "6.17.0",
     "sharp": "0.35.5",
     "zod": "^4.0.0"

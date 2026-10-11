@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { Project } from "@/lib/content-schema";
+import { PointerParallax } from "./pointer-parallax";
 import { ProjectArt } from "./project-art";
 import { Reveal } from "./reveal";
 
@@ -14,7 +15,7 @@ const workTags: Record<Project["category"], string> = {
 export function ProjectCard({ project, wide = false }: { project: Project; wide?: boolean }) {
   return (
     <Link href={`/work/${project.slug}`} className="project-card">
-      <Reveal kind="image"><div className="project-visual">
+      <Reveal kind="image"><PointerParallax className="project-visual">
         {project.cover
           ? <Image src={project.cover.url} alt={project.cover.alt} fill sizes={wide ? "(max-width: 760px) 100vw, 90vw" : "(max-width: 760px) 100vw, 45vw"} />
           : <ProjectArt />}
@@ -25,8 +26,7 @@ export function ProjectCard({ project, wide = false }: { project: Project; wide?
           <span className="project-info-type">{project.category}{project.studioStudy ? " / Studio study" : ""}{project.year && <> · {project.year}</>}</span>
           <div className="project-description"><p>{project.description}</p></div>
         </div>
-      </div>
-      </Reveal>
+      </PointerParallax></Reveal>
     </Link>
   );
 }

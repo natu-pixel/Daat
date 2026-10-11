@@ -110,6 +110,10 @@ body:has(.homepage) .announcement-window { padding-top: 8px; padding-bottom: 8px
 .project-visual { overflow: hidden; position: relative; aspect-ratio: 16 / 9; background: var(--navy); }
 .project-visual > img { object-fit: contain; transition: transform .6s cubic-bezier(.2,.8,.2,1); }
 .project-card:hover .project-visual > img { transform: scale(1.025); }
+/* Pointer parallax: the card visual drifts toward the cursor while its overlays counter-drift for depth. Both ease back to rest when the pointer leaves; the vars are written per frame by components/pointer-parallax.tsx. */
+.project-visual { --parallax-x: 0; --parallax-y: 0; --parallax-shift: 10px; --parallax-shift-overlay: -5px; translate: calc(var(--parallax-x) * var(--parallax-shift)) calc(var(--parallax-y) * var(--parallax-shift)); }
+.project-visual[data-parallax="tracking"] { will-change: translate; }
+.project-tag, .project-open, .project-info { translate: calc(var(--parallax-x) * var(--parallax-shift-overlay)) calc(var(--parallax-y) * var(--parallax-shift-overlay)); }
 .project-open { position: absolute; top: 24px; right: 24px; display: grid; place-items: center; width: 48px; height: 48px; border-radius: 50%; background: var(--white); font-size: 28px; color: var(--navy); z-index: 3; transition: transform .25s, background .25s; }
 .project-card:hover .project-open { transform: rotate(45deg); background: var(--cyan); }
 /* Name and type sit on the photo; hover or focus darkens it slightly and opens the description. */
@@ -507,14 +511,14 @@ a:is(:hover, :focus-visible) .web-tile-art small { color: var(--cyan); }
 [data-reveal] { transform-origin: center center; }
 /* Left-to-right colour wipe: deep blue leads, light blue follows, then the text's own colour. */
 :is(.sweep-wait, .is-sweeping) { --sweep-final: currentColor; background-image: linear-gradient(90deg, var(--sweep-final) 0 34%, #a9c4ff 41%, #2a41f1 49%, transparent 58%); background-size: 300% 100%; background-repeat: no-repeat; background-position: 100% 0; -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
-.is-sweeping { animation: text-sweep 1.4s cubic-bezier(.45, 0, .2, 1) var(--sweep-delay, 0s) both; }
+.is-sweeping { animation: text-sweep 2.2s cubic-bezier(.45, 0, .2, 1) var(--sweep-delay, 0s) both; }
 @keyframes text-sweep { from { background-position: 100% 0; } to { background-position: 0 0; } }
 /* Gradient text: the sweep band runs over the gradient while a matching mask reveals it left to right. */
 /* Gradient text only paints inside its box; the padding/negative margin pair extends it under descenders without moving layout. */
 .text-gradient { --text-gradient: linear-gradient(90deg, var(--navy) 10%, var(--blue)); background-image: var(--text-gradient); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; padding-bottom: .22em; margin-bottom: -.22em; }
 .text-gradient-light { --text-gradient: linear-gradient(90deg, var(--blue), var(--azure) 60%, var(--jordy)); }
 .text-gradient:is(.sweep-wait, .is-sweeping) { background-image: linear-gradient(90deg, transparent 0 34%, #a9c4ff 41%, #2a41f1 49%, transparent 58%), var(--text-gradient); background-size: 300% 100%, 100% 100%; -webkit-mask-image: linear-gradient(90deg, #000 0 49%, transparent 58%); mask-image: linear-gradient(90deg, #000 0 49%, transparent 58%); -webkit-mask-size: 300% 100%; mask-size: 300% 100%; -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat; -webkit-mask-position: 100% 0; mask-position: 100% 0; }
-.text-gradient.is-sweeping { animation: text-sweep 1.4s cubic-bezier(.45, 0, .2, 1) var(--sweep-delay, 0s) both, text-sweep-mask 1.4s cubic-bezier(.45, 0, .2, 1) var(--sweep-delay, 0s) both; }
+.text-gradient.is-sweeping { animation: text-sweep 2.2s cubic-bezier(.45, 0, .2, 1) var(--sweep-delay, 0s) both, text-sweep-mask 2.2s cubic-bezier(.45, 0, .2, 1) var(--sweep-delay, 0s) both; }
 @keyframes text-sweep-mask { from { -webkit-mask-position: 100% 0; mask-position: 100% 0; } to { -webkit-mask-position: 0 0; mask-position: 0 0; } }
 .see-all-link { display: inline-flex; align-items: center; gap: 8px; flex-shrink: 0; font-size: var(--step-0h); font-weight: 500; letter-spacing: -.01em; white-space: nowrap; background-image: linear-gradient(90deg, var(--navy) 15%, var(--blue)); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
 .see-all-link span { -webkit-text-fill-color: var(--blue); transition: transform .2s; }

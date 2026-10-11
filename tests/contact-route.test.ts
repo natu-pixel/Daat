@@ -1,33 +1,43 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-const mocks = vi.hoisted(() => ({ limit: vi.fn(), send: vi.fn() }));
-vi.mock("@upstash/redis", () => ({ Redis: class {} }));
-vi.mock("@upstash/ratelimit", () => ({
-  Ratelimit: class {
-    static slidingWindow() { return {}; }
-    limit = mocks.limit;
-  },
-}));
-vi.mock("resend", () => ({ Resend: class { emails = { send: mocks.send }; } }));
+const mocks = vi.hoisted(() => {
+  const values = new Map<string, string>();
+  const kv = {
+    get: vi.fn(async (key: string) => values.get(key) ?? null),
+    put: vi.fn(async (key: string, value: string) => { values.set(key, value); }),
+  };
+  return {
+    values,
+    kv,
+    getContext: vi.fn((): { env: { RATELIMIT_KV?: typeof kv } } => ({ env: { RATELIMIT_KV: kv } })),
+  };
+});
+
+vi.mock("@opennextjs/cloudflare", () => ({ getCloudflareContext: mocks.getContext }));
 import { POST } from "../app/api/contact/route";
 
 const payload = { name: "Test Person", email: "person@example.com", service: "Brand identity", message: "We would like to discuss a new brand identity.", website: "", consent: true };
-function request(body = JSON.stringify(payload), origin = "http://localhost:3000", type = "application/json") {
-  return new Request("http://localhost:3000/api/contact", { method: "POST", headers: { origin, "content-type": type }, body });
+function request(body = JSON.stringify(payload), origin = "http://localhost:3000", type = "application/json", address = "192.0.2.10") {
+  return new Request("http://localhost:3000/api/contact", {
+    method: "POST",
+    headers: { origin, "content-type": type, "cf-connecting-ip": address },
+    body,
+  });
 }
 
 beforeEach(() => {
+  mocks.values.clear();
   vi.stubEnv("SITE_URL", "http://localhost:3000");
   vi.stubEnv("RESEND_API_KEY", "test-placeholder");
   vi.stubEnv("CONTACT_FROM", "studio@example.com");
   vi.stubEnv("CONTACT_TO", "inbox@example.com");
-  vi.stubEnv("UPSTASH_REDIS_REST_URL", "https://example.com");
-  vi.stubEnv("UPSTASH_REDIS_REST_TOKEN", "test-placeholder");
-  mocks.limit.mockReset().mockResolvedValue({ success: true, reset: Date.now() + 60000 });
-  mocks.send.mockReset().mockResolvedValue({ data: { id: "test-id" }, error: null });
+  mocks.kv.get.mockClear().mockImplementation(async (key: string) => mocks.values.get(key) ?? null);
+  mocks.kv.put.mockClear().mockImplementation(async (key: string, value: string) => { mocks.values.set(key, value); });
+  mocks.getContext.mockClear().mockImplementation(() => ({ env: { RATELIMIT_KV: mocks.kv } }));
+  vi.stubGlobal("fetch", vi.fn(async () => new Response(JSON.stringify({ id: "test-id" }), { status: 200 })));
   vi.spyOn(console, "error").mockImplementation(() => {});
 });
-afterEach(() => { vi.unstubAllEnvs(); vi.restoreAllMocks(); });
+afterEach(() => { vi.unstubAllEnvs(); vi.unstubAllGlobals(); vi.restoreAllMocks(); });
 
 describe("contact endpoint", () => {
   it("rejects cross-origin requests", async () => expect((await POST(request(undefined, "https://untrusted.example"))).status).toBe(403));
@@ -35,43 +45,67 @@ describe("contact endpoint", () => {
   it("does not pretend to send without credentials", async () => {
     vi.stubEnv("RESEND_API_KEY", "");
     expect((await POST(request())).status).toBe(503);
-    expect(mocks.send).not.toHaveBeenCalled();
+    expect(fetch).not.toHaveBeenCalled();
+  });
+  it("reports a missing KV binding without attempting delivery", async () => {
+    mocks.getContext.mockReturnValueOnce({ env: {} });
+    expect((await POST(request())).status).toBe(503);
+    expect(fetch).not.toHaveBeenCalled();
   });
   it("rejects oversized payloads", async () => expect((await POST(request("x".repeat(16385)))).status).toBe(413));
   it("rejects malformed JSON", async () => expect((await POST(request("{bad"))).status).toBe(400));
   it("rejects spam without sending", async () => {
     expect((await POST(request(JSON.stringify({ ...payload, website: "spam" })))).status).toBe(422);
-    expect(mocks.send).not.toHaveBeenCalled();
+    expect(fetch).not.toHaveBeenCalled();
   });
-  it("enforces visitor rate limits", async () => {
-    mocks.limit.mockResolvedValue({ success: false, reset: Date.now() + 60000 });
+  it("enforces three submissions per visitor in a fixed window", async () => {
+    expect((await POST(request())).status).toBe(200);
+    expect((await POST(request())).status).toBe(200);
+    expect((await POST(request())).status).toBe(200);
     const response = await POST(request());
     expect(response.status).toBe(429);
     expect(Number(response.headers.get("retry-after"))).toBeGreaterThan(0);
-    expect(mocks.send).not.toHaveBeenCalled();
+    expect(fetch).toHaveBeenCalledTimes(3);
   });
-  it("enforces the global rate limit", async () => {
-    mocks.limit.mockResolvedValueOnce({ success: true }).mockResolvedValueOnce({ success: false, reset: Date.now() + 60000 });
-    expect((await POST(request())).status).toBe(429);
-    expect(mocks.send).not.toHaveBeenCalled();
+  it("enforces the global limit", async () => {
+    for (let index = 0; index < 50; index += 1) {
+      expect((await POST(request(JSON.stringify(payload), undefined, undefined, `192.0.2.${index + 1}`))).status).toBe(200);
+    }
+    const response = await POST(request(JSON.stringify(payload), undefined, undefined, "198.51.100.20"));
+    expect(response.status).toBe(429);
+    expect(Number(response.headers.get("retry-after"))).toBeGreaterThan(0);
+    expect(fetch).toHaveBeenCalledTimes(50);
   });
-  it("fails closed on rate-limit provider failure", async () => {
-    mocks.limit.mockRejectedValue(new Error("Provider unavailable"));
+  it("fails closed when the KV rate-limit store errors", async () => {
+    mocks.kv.get.mockRejectedValueOnce(new Error("KV unavailable"));
     expect((await POST(request())).status).toBe(503);
-    expect(mocks.send).not.toHaveBeenCalled();
+    expect(fetch).not.toHaveBeenCalled();
   });
-  it("surfaces email provider rejection", async () => {
-    mocks.send.mockResolvedValue({ data: null, error: { name: "validation_error" } });
+  it("logs the provider rejection but returns a generic response", async () => {
+    vi.mocked(fetch).mockResolvedValueOnce(new Response(JSON.stringify({ name: "validation_error", message: "domain is not verified" }), { status: 422 }));
+    const response = await POST(request());
+    expect(response.status).toBe(502);
+    expect(await response.json()).toMatchObject({ message: "Your inquiry couldn't be sent. Please try again later." });
+    expect(console.error).toHaveBeenCalledWith("Resend rejected the inquiry:", expect.objectContaining({ message: "domain is not verified", status: 422 }));
+  });
+  it("reports email network errors safely", async () => {
+    vi.mocked(fetch).mockRejectedValueOnce(new Error("Network unavailable"));
     expect((await POST(request())).status).toBe(502);
   });
-  it("surfaces email network failure", async () => {
-    mocks.send.mockRejectedValue(new Error("Network unavailable"));
-    expect((await POST(request())).status).toBe(502);
-  });
-  it("requires provider acceptance and uses reply-to", async () => {
+  it("sends plain text through Resend and uses reply-to", async () => {
     const response = await POST(request());
     expect(response.status).toBe(200);
     expect(await response.json()).toMatchObject({ ok: true });
-    expect(mocks.send).toHaveBeenCalledWith(expect.objectContaining({ from: "studio@example.com", replyTo: payload.email, to: ["inbox@example.com"] }));
+    expect(fetch).toHaveBeenCalledWith("https://api.resend.com/emails", expect.objectContaining({
+      method: "POST",
+      headers: expect.objectContaining({ Authorization: "Bearer test-placeholder" }),
+      body: JSON.stringify({
+        from: "studio@example.com",
+        to: ["inbox@example.com"],
+        reply_to: payload.email,
+        subject: "DAAT project inquiry — Brand identity",
+        text: `Name: ${payload.name}\nReply to: ${payload.email}\nInterested in: ${payload.service}\n\n${payload.message}`,
+      }),
+    }));
   });
 });

@@ -1,4 +1,4 @@
-const sweepStagger = .14;
+const sweepStagger = .22;
 
 export function prepareTextSweep(root: Element) {
   for (const element of root.querySelectorAll<HTMLElement>("[data-sweep]")) element.classList.add("sweep-wait");
