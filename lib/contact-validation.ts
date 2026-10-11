@@ -5,9 +5,14 @@ export const contactSchema = z.object({
   email: z.email("Please enter a valid email address.").max(254),
   service: z.enum(["Not sure yet", "Brand identity", "Web development", "Motion design"]),
   message: z.string().trim().min(20, "Please share at least 20 characters about your project.").max(4000),
+  meetingDate: z.string().max(10).optional().default(""),
+  meetingTime: z.string().max(5).optional().default(""),
   website: z.string().max(0, "We couldn't accept this submission."),
   consent: z.literal(true, { error: "Please agree to the privacy notice." }),
-});
+}).refine(
+  ({ meetingDate, meetingTime }) => Boolean(meetingDate) === Boolean(meetingTime),
+  { message: "Please choose both a date and time for your Google Meet request.", path: ["meetingDate"] },
+);
 
 export function previewPath(value: string | null) {
   if (value === "/" || value === "/work" || value === "/about" || value === "/services") return value;

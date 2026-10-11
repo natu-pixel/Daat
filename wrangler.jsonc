@@ -1,6 +1,7 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "daat",
+  "account_id": "650ca8cde8dff7e84cacaaeb07464446",
   "main": ".open-next/worker.js",
   "build": {
     "command": "npm run build:cloudflare"
@@ -14,8 +15,20 @@
     "directory": ".open-next/assets",
     "binding": "ASSETS"
   },
+  "kv_namespaces": [
+    {
+      "binding": "RATELIMIT_KV",
+      "id": "a6ee05b530ec410586d4c0e8b8e76ca2"
+    }
+  ],
   "vars": {
-    "SITE_URL": "https://daat.tech"
+    "SITE_URL": "https://daat.tech",
+    "GOOGLE_CALENDAR_ID": "primary",
+    "BOOKING_TIME_ZONE": "Africa/Nairobi",
+    "BOOKING_START_TIME": "09:00",
+    "BOOKING_END_TIME": "17:00",
+    "BOOKING_SLOT_MINUTES": "30",
+    "BOOKING_INTERVAL_MINUTES": "30"
   },
   "keep_vars": true,
   "services": [

@@ -72,16 +72,27 @@ The endpoint validates the secret and allows only internal studio/project paths.
 
 ## Contact delivery
 
-Set `SITE_URL` to the exact website origin. Configure:
+Set `SITE_URL` to the exact website origin. Configure these Worker settings:
 
 - `RESEND_API_KEY`, `CONTACT_FROM` from a verified sender domain, and `CONTACT_TO` (comma-separated recipients allowed).
-- `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN` for durable abuse prevention.
+- A KV namespace binding named `RATELIMIT_KV` for abuse prevention. Add its namespace ID to `kv_namespaces` in [wrangler.jsonc](./wrangler.jsonc) before deploying.
 
-The endpoint validates origin, JSON payload size, input values, consent, and a honeypot. It permits three submissions per network identifier per ten minutes, plus fifty globally per hour. Rate-limit failures fail closed. Deploy behind a trusted proxy (such as Vercel) that overwrites `x-forwarded-for`; do not expose an origin that accepts arbitrary client-supplied forwarded headers.
+The endpoint validates origin, JSON payload size, input values, consent, and a honeypot. It allows up to three submissions per Cloudflare client IP per fixed ten-minute window, plus fifty globally per fixed hour. KV is eventually consistent and does not provide atomic increments, so these are best-effort abuse limits rather than strict quotas; the endpoint fails closed if KV errors. The client IP is hashed before it is used in a KV key. Resend is called directly over HTTPS, and provider rejection details are written to Worker logs without returning them to the visitor.
 
 No inquiry is stored in Sanity. Plain-text email avoids injecting submitted HTML. The user's email becomes reply-to, never the sender. Success means Resend accepted the message, not guaranteed inbox delivery. Provider failures and missing configuration display explicit errors; local mode never pretends to send.
 
 Send a real inquiry and check the recipient inbox before calling the contact form live.
+
+## Google Calendar video-call booking
+
+The video-call form checks free/busy on the configured calendar, then creates an event with a unique Google Meet conference and invites the visitor. The default schedule is Monday–Friday, 09:00–17:00 Africa/Nairobi, with 30-minute calls starting every 30 minutes. Adjust the `BOOKING_*` values in Wrangler before deploying if the studio uses different hours.
+
+1. In Google Cloud, enable the Google Calendar API and create a **Web application** OAuth client. Add JavaScript origins `http://localhost:3000` and `https://daat.tech`; add redirect URIs `http://localhost:3000/api/google/callback` and `https://daat.tech/api/google/callback`.
+2. Configure `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, and a long random `GOOGLE_SETUP_KEY` as local `.dev.vars` values and Cloudflare Worker secrets. Do not put credential JSON or secret values in this repository.
+3. Visit `/api/google/connect` on the environment you are connecting and authorize the studio Google account. Copy the one-time refresh token shown after authorization and set it as the `GOOGLE_REFRESH_TOKEN` Worker secret. Remove `GOOGLE_SETUP_KEY` after setup.
+4. Keep the Google account calendar accessible to the OAuth account. The visitor receives a Google Calendar invitation with the Meet link. Google OAuth requires the `calendar.events` and `calendar.freebusy` scopes requested by the app.
+
+The booking API rechecks the selected slot before inserting an event and limits each Cloudflare client IP to three booking requests per ten minutes using `RATELIMIT_KV`. Until OAuth secrets and authorization are configured, availability and booking endpoints return setup errors; they do not claim a booking succeeded.
 
 ## Motion and gallery
 

@@ -273,6 +273,11 @@ body:has(.homepage) .announcement-window { padding-top: 8px; padding-bottom: 8px
 .contact-phone-panel::after { content: ""; position: absolute; inset: 0; z-index: -1; background: linear-gradient(180deg, transparent 60%, #0509268c); pointer-events: none; }
 .contact-phone-tile { align-self: center; width: min(300px, 78%); aspect-ratio: 1; display: grid; place-items: center; padding: 20px; background: #fff; border-radius: 28px; box-shadow: 0 30px 60px -20px #050926a6, 0 0 0 8px #ffffff26; transition: transform .5s cubic-bezier(.2,.8,.2,1); }
 .contact-phone-panel:hover .contact-phone-tile { transform: translateY(-4px) rotate(-1.5deg); }
+.contact-mode-switch { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; margin-bottom: 24px; padding: 5px; border-radius: 12px; background: #f0f2fa; }
+.contact-mode-switch button { min-height: 44px; padding: 9px 12px; border: 0; border-radius: 9px; background: transparent; color: #565a70; font: inherit; font-size: var(--step--1); cursor: pointer; }
+.contact-mode-switch button.is-active { background: #fff; color: var(--blue); box-shadow: 0 2px 8px #1d285014; }
+.contact-mode-switch button:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+.video-call-intro { margin: -4px 0 20px; color: #686b7b; font-size: var(--step--1); line-height: 1.55; }
 .contact-phone-art { display: block; width: 100%; height: auto; overflow: visible; }
 .contact-phone-art .phone-rings { stroke: var(--blue); }
 .contact-phone-art .phone-cord { stroke: var(--azure); }
