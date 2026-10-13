@@ -6,7 +6,7 @@ import { useMotionPreference } from "@/lib/use-motion-preference";
 // Portfolio card imagery drifts toward the pointer while the pointer is over the card
 // and eases back to rest when it leaves. The overlays counter-drift through CSS for
 // depth. Reduced motion and touch pointers leave the artwork completely still.
-export function PointerParallax({ children, className, depth = 10 }: { children: React.ReactNode; className?: string; depth?: number }) {
+export function PointerParallax({ children, className, depth = 10, ...props }: { children: React.ReactNode; className?: string; depth?: number } & React.HTMLAttributes<HTMLDivElement>) {
   const host = useRef<HTMLDivElement>(null);
   const reduced = useMotionPreference();
 
@@ -70,5 +70,5 @@ export function PointerParallax({ children, className, depth = 10 }: { children:
     };
   }, [depth, reduced]);
 
-  return <div ref={host} className={className} data-parallax="idle">{children}</div>;
+  return <div ref={host} className={className} data-parallax="idle" {...props}>{children}</div>;
 }

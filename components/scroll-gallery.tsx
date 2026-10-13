@@ -76,7 +76,7 @@ export function ScrollGallery({ media, studioStudy = false, heading, credit }: {
                   const distance = target.current.offsetHeight - viewport.current.offsetHeight;
                   window.scrollTo({ top: top + distance * index / (count - 1), behavior: "instant" });
                 }}>
-                  <div className={`gallery-panel-art${!studioStudy && asset?.kind === "image" ? " is-image" : ""}`}>
+                  <div className={`gallery-panel-art${!studioStudy && asset?.kind === "image" ? " is-image" : ""}`} data-cursor>
                     {studioStudy ? <Scene index={index} /> : asset?.kind === "image" ? <Image src={asset.url} alt={asset.alt} width={asset.width || 1600} height={asset.height || 900} sizes="90vw" /> : asset?.kind === "video" ? <video controls preload="none" poster={asset.poster} aria-label={asset.alt}><source src={asset.url} />Your browser does not support this video.</video> : null}
                   </div>
                   <div className="gallery-caption"><span>#{String(index + 1).padStart(3, "0")}</span><span>{studioStudy ? scenes[index] : asset?.alt}</span><span>DAAT®</span></div>

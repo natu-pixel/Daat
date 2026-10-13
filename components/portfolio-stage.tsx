@@ -6,7 +6,7 @@ import { Reveal } from "./reveal";
 function TileContent({ project, index }: { project: WebProject; index: number }) {
   return (
     <>
-      <Reveal className="portfolio-stage-image" kind="image" delay={index * .09}>
+      <Reveal className="portfolio-stage-image" kind="image" delay={index * .09} data-cursor>
         {project.image
           ? <Image src={project.image.url} alt={project.image.alt} fill priority={index === 0} sizes={index === 0 ? "(max-width: 760px) 100vw, 65vw" : "(max-width: 760px) 50vw, 33vw"} />
           : <div className="web-tile-art">

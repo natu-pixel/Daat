@@ -5,7 +5,7 @@ import { useAnimate } from "motion/react";
 import { useMotionPreference } from "@/lib/use-motion-preference";
 import { playTextSweep, prepareTextSweep, settleTextSweep } from "@/lib/text-sweep";
 
-export function Reveal({ children, className, delay = 0, kind = "text" }: { children: React.ReactNode; className?: string; delay?: number; kind?: "text" | "image" }) {
+export function Reveal({ children, className, delay = 0, kind = "text", ...props }: { children: React.ReactNode; className?: string; delay?: number; kind?: "text" | "image" } & React.HTMLAttributes<HTMLDivElement>) {
   const reduced = useMotionPreference();
   const [scope, animate] = useAnimate<HTMLDivElement>();
   const played = useRef(false);
@@ -53,5 +53,5 @@ export function Reveal({ children, className, delay = 0, kind = "text" }: { chil
     return () => target.removeEventListener("focusin", settle);
   }, [animate, scope]);
 
-  return <div ref={scope} className={className} data-reveal={kind}>{children}</div>;
+  return <div ref={scope} className={className} data-reveal={kind} {...props}>{children}</div>;
 }

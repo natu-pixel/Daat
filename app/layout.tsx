@@ -4,6 +4,7 @@ import { draftMode } from "next/headers";
 import { Header } from "@/components/header";
 import { AnnouncementBar } from "@/components/announcement-bar";
 import { Footer } from "@/components/footer";
+import { DtCursor } from "@/components/dt-cursor";
 import "./globals.css";
 
 const aspekta = localFont({
@@ -38,6 +39,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <Header />
         <main id="main">{children}</main>
         <Footer />
+        <DtCursor />
       </body>
     </html>
   );
