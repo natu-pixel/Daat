@@ -14,7 +14,10 @@ import { SectionTransition } from "@/components/section-transition";
 import { LogoTicker } from "@/components/logo-ticker";
 import { CountUp } from "@/components/count-up";
 
-export const metadata: Metadata = { alternates: { canonical: "/" } };
+export const metadata: Metadata = {
+  description: "DAAT is a creative studio building distinctive brand identities, websites, and motion design for ambitious businesses.",
+  alternates: { canonical: "/" },
+};
 
 const heroSlides = [
   { url: "/hero/01.webp", alt: "DAAT featured project" },
@@ -88,6 +91,13 @@ export default async function Home() {
           </section>
         </div>
       </div>
+      <section className="section about-process" aria-labelledby="daat-process-heading">
+        <div className="section-heading"><div><span className="eyebrow">03 / A CONNECTED APPROACH</span><h2 id="daat-process-heading">Clear direction.<br /><span className="muted">Considered details.</span></h2></div></div>
+        <p>Strong creative work starts with understanding the business behind it. We learn what you offer, who you need to reach, and what needs to change. That context guides the visual direction and helps each decision serve a clear purpose.</p>
+        <p>For a brand identity, we build a recognizable visual language that can grow across everyday touchpoints. For a website, we connect structure, content, and interaction so visitors can understand what you do and take the next step. Motion brings the system to life through movement, transitions, and campaign assets.</p>
+        <p>These disciplines can work on their own or as one joined project. The right scope depends on your goals and the stage your business is at. We agree the priorities and deliverables together, then create work designed to remain clear and useful beyond its first launch.</p>
+        <Link href="/services" className="text-link">Explore DAAT services <span aria-hidden="true">↗</span></Link>
+      </section>
     </div>
   );
 }

@@ -15,7 +15,7 @@ const aspekta = localFont({
 });
 
 const baseMetadata: Metadata = {
-  metadataBase: new URL(process.env.SITE_URL || "http://localhost:3000"),
+  metadataBase: new URL(process.env.SITE_URL || "https://daat.tech"),
   title: { default: "DAAT — Brand. Digital. Motion.", template: "%s — DAAT" },
   description: "Clarity in thought. Impact by design. DAAT connects brand identity, web development, and motion into distinctive digital experiences.",
   openGraph: { type: "website", siteName: "DAAT", images: [{ url: "/opengraph-image", width: 1200, height: 630 }] },
@@ -30,9 +30,27 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const { isEnabled } = await draftMode();
+  const siteUrl = process.env.SITE_URL || "https://daat.tech";
+  const jsonLd = [
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      name: "DAAT",
+      url: siteUrl,
+      logo: `${siteUrl}/brand/daat-wordmark.svg`,
+      sameAs: ["https://www.instagram.com/daat_tech/", "https://www.facebook.com/share/1BkykyffJJ/"],
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      name: "DAAT",
+      url: siteUrl,
+    },
+  ];
   return (
     <html lang="en" className={aspekta.variable}>
       <body>
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }} />
         <a href="#main" className="skip-link">Skip to content</a>
         {isEnabled && <div className="preview-banner">Draft preview <a href="/api/draft/disable">Exit preview</a></div>}
         <AnnouncementBar />

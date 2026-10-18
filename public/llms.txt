@@ -1,0 +1,20 @@
+# DAAT
+
+> DAAT is a creative studio connecting brand identity, web development, and motion design for ambitious businesses.
+
+DAAT helps businesses build clear, distinctive brands and digital experiences. The studio offers brand identity, web design and development, and motion design as individual or connected services. Project scope and deliverables are agreed with each client.
+
+## Main pages
+
+- [Home](https://daat.tech/): Studio overview and selected work.
+- [Work](https://daat.tech/work): Selected identity, digital, and campaign projects.
+- [Services](https://daat.tech/services): Brand identity, web development, and motion design services.
+- [Studio](https://daat.tech/about): About DAAT and how the studio works.
+- [Contact](https://daat.tech/contact): Start a project inquiry.
+- [Privacy](https://daat.tech/privacy): Information about inquiry handling and privacy.
+
+## Notes
+
+- The portfolio contains selected projects and illustrative work.
+- Contact DAAT for current availability, project scope, and pricing.
+- The sitemap is available at https://daat.tech/sitemap.xml.

@@ -247,6 +247,7 @@ body:has(.homepage) .announcement-window { padding-top: 8px; padding-bottom: 8px
 .about-fit { display: grid; grid-template-columns: 1fr 1fr; gap: 70px; }
 .about-fit h2 { font-size: var(--step-2); line-height: 1.08; letter-spacing: -.05em; margin-top: 24px; }
 .about-fit p, .about-process li p { color: #565a70; font-size: var(--step-0); line-height: 1.65; margin-top: 16px; }
+.about-process > p { max-width: 800px; color: #565a70; font-size: var(--step-0); line-height: 1.7; margin: 20px 0; }
 .about-fit > ul { list-style: none; padding: 0; margin: 0; }
 .about-fit li { border-top: 1px solid var(--line); padding: 25px 0; }
 .about-fit h3, .about-process h3 { font-size: var(--step-1); letter-spacing: -.03em; }
