@@ -12,6 +12,12 @@ export function Footer() {
     <footer className="footer">
       <FooterFlow motion={motion} />
       <div className="footer-conversation"><Link href="/" aria-label="DAAT home"><Wordmark /></Link><Link href="/contact" className="text-link">Start a project <span aria-hidden="true">↗</span></Link></div>
+      <nav className="footer-nav" aria-label="Site links">
+        <Link href="/work">Work</Link>
+        <Link href="/services">Services</Link>
+        <Link href="/about">Studio</Link>
+        <Link href="/contact">Contact</Link>
+      </nav>
       <div className="footer-bottom">
         <span>Brand. Digital. Motion.</span>
         <div><Link href="/privacy">Privacy</Link><span>© {new Date().getFullYear()} DAAT</span></div>

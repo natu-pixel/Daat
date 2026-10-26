@@ -14,7 +14,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const { projects } = await getContent();
   const project = projects.find((item) => item.slug === slug);
-  return { title: project?.title || "Project not found", description: project?.description, alternates: { canonical: `/work/${slug}` } };
+  return {
+    title: project?.title || "Project not found",
+    description: project?.description,
+    alternates: { canonical: `/work/${slug}` },
+    openGraph: project?.cover ? {
+      images: [{ url: project.cover.url, ...(project.cover.width && project.cover.height ? { width: project.cover.width, height: project.cover.height } : {}) }],
+    } : undefined,
+  };
 }
 
 export default async function CaseStudy({ params }: Props) {
