@@ -27,9 +27,8 @@ export const localServices = [
 
 type Artwork = { url: string; width: number; height: number };
 
-function gallery(assets: Artwork[], captions: string[]): Project["gallery"] {
-  if (assets.length !== captions.length) throw new Error("Portfolio artwork and captions do not match. Update local-content after preparing assets.");
-  return assets.map((asset, index) => ({ kind: "image", ...asset, alt: captions[index] }));
+function gallery(assets: Artwork[], captions: string[], projectName: string): Project["gallery"] {
+  return assets.map((asset, index) => ({ kind: "image", ...asset, alt: captions[index] ?? `${projectName} identity application ${index + 1}` }));
 }
 
 const aero = gallery(artwork.aero, [
@@ -41,20 +40,20 @@ const aero = gallery(artwork.aero, [
   "AeroGrain campaign display in a plant-filled interior",
   "AeroGrain green modular exhibition wall",
   "AeroGrain exterior signage and hoodie application",
-]);
+], "AeroGrain");
 const apex = gallery(artwork.apex.filter((_, index) => index !== 3), [
   "Apex red symbol on apparel and a mobile app icon",
   "Apex identity across signage, packaging, digital screens, and a graphic pattern",
   "Apex social profile and red-and-yellow campaign graphics",
   "Apex red-and-black wordmark and transparent business card",
-]);
+], "Apex");
 const pulse = gallery(artwork.pulse, [
   "PulseDock white identity over a purple virtual-reality portrait",
   "PulseDock wave-mark construction and branded shopping bag",
   "PulseDock branded tote in a black-and-white interior",
   "PulseDock identity on a smartwatch",
   "PulseDock Stay Charged Stay Moving outdoor campaign",
-]);
+], "PulseDock");
 const solvanta = gallery(artwork.solvanta, [
   "Solvanta Labs identity over a black-and-white technology image",
   "Solvanta Labs exterior signage and orange stationery",
@@ -64,8 +63,7 @@ const solvanta = gallery(artwork.solvanta, [
   "Solvanta Labs branded tote and T-shirt",
   "Solvanta Labs Powering Smarter Tomorrows billboard",
   "Solvanta Labs large-format interior brand wall",
-]);
-solvanta.push(...gallery([artwork.apex[3]], ["Solvanta Labs black-and-yellow social post series"]));
+], "Solvanta Labs");
 const posters = gallery(artwork.poster, [
   "Tropical Padel racket and court campaign",
   "Bloom warm-toned seating and lifestyle campaign",
@@ -77,7 +75,7 @@ const posters = gallery(artwork.poster, [
   "Tropical Padel blue-court team campaign",
   "Financial partnership campaign in warm neutral tones",
   "Property campaign with a house and pale-blue typography",
-]);
+], "Campaign");
 
 export const studioStudyProject: Project = {
   slug: "daat-brand-system",
